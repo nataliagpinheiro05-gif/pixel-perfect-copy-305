@@ -73,7 +73,7 @@ function PedidoDetailPage() {
     const { error: e2 } = await supabase.from("pedido_itens").insert(itens);
     if (e2) { toast.error(e2.message); return; }
     toast.success(`Pedido #${novo.numero} duplicado`);
-    navigate({ to: "/pedidos/$id" as any, params: { id: novo.id } });
+    navigate({ to: "/pedidos/$id" as any, params: { id: novo.id } as any });
   }
 
   return (
