@@ -306,36 +306,36 @@ function SimpleListCRUD<T extends { id: string; nome: string; ativo: boolean }>(
   const [novoExtra, setNovoExtra] = useState("0");
   const { data: lista = [] } = useQuery({
     queryKey: [queryKey],
-    queryFn: async () => (await supabase.from(table).select("*").order("nome")).data ?? [],
+    queryFn: async () => (await (supabase.from(table) as any).select("*").order("nome")).data ?? [],
   });
 
   async function adicionar() {
     if (!novo.trim()) return;
     const payload: any = { nome: novo.trim() };
     if (extraField) payload[extraField.key] = Number(novoExtra) || 0;
-    const { error } = await supabase.from(table).insert(payload);
+    const { error } = await (supabase.from(table) as any).insert(payload);
     if (error) toast.error(error.message);
     else { setNovo(""); setNovoExtra("0"); qc.invalidateQueries({ queryKey: [queryKey] }); }
   }
   async function toggleAtivo(item: any) {
-    const { error } = await supabase.from(table).update({ ativo: !item.ativo }).eq("id", item.id);
+    const { error } = await (supabase.from(table) as any).update({ ativo: !item.ativo }).eq("id", item.id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: [queryKey] });
   }
   async function renomear(item: any) {
     const novoNome = prompt("Novo nome:", item.nome);
     if (!novoNome) return;
-    const { error } = await supabase.from(table).update({ nome: novoNome.trim() }).eq("id", item.id);
+    const { error } = await (supabase.from(table) as any).update({ nome: novoNome.trim() }).eq("id", item.id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: [queryKey] });
   }
   async function editarPreco(item: any) {
     const v = prompt("Novo preço (R$):", String(item.preco));
     if (v == null) return;
-    const { error } = await supabase.from(table).update({ preco: Number(v) || 0 }).eq("id", item.id);
+    const { error } = await (supabase.from(table) as any).update({ preco: Number(v) || 0 }).eq("id", item.id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: [queryKey] });
   }
   async function excluir(item: any) {
     if (!confirm(`Excluir "${item.nome}"?`)) return;
-    const { error } = await supabase.from(table).delete().eq("id", item.id);
+    const { error } = await (supabase.from(table) as any).delete().eq("id", item.id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: [queryKey] });
   }
 
