@@ -10,7 +10,7 @@ import { brl } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, Copy, Trash2, X } from "lucide-react";
-import { useAuthLikeNoop } from "@/hooks/use-auth";
+
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
   head: () => ({ meta: [{ title: "Pedido — FitLounge" }] }),
