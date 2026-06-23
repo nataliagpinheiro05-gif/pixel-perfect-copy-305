@@ -48,7 +48,7 @@ function PedidosListPage() {
 
       <div className="space-y-2">
         {pedidos.map((p: any) => (
-          <Link key={p.id} to={"/pedidos/$id" as any} params={{ id: p.id }}>
+          <Link key={p.id} to={"/pedidos/$id" as any} params={{ id: p.id } as any}>
             <Card className="p-3 flex items-center justify-between hover:border-primary transition-colors">
               <div>
                 <div className="font-bold">#{p.numero} <span className="text-sm font-normal text-muted-foreground">— {p.cliente?.nome ?? "Sem cliente"}</span></div>
