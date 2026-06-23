@@ -84,13 +84,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "FitLounge" },
       { name: "theme-color", content: "#0E3D2E" },
       { property: "og:title", content: "Gestão FitLounge" },
-      { property: "og:description", content: "Sistema interno de gestão da loja FitLounge: pedidos, cozinha, clientes, estoque, Meu Slim e financeiro." },
+      { property: "og:description", content: "Controle de atendimento, pedidos, cozinha, clientes, estoque e financeiro." },
       { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "Gestão FitLounge" },
-      { name: "twitter:description", content: "Sistema interno de gestão da loja FitLounge: pedidos, cozinha, clientes, estoque, Meu Slim e financeiro." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5c27b4e3-923f-45ca-86bd-3e316f0a8404/id-preview-67ee19fb--52bf3ac4-970c-40f9-94ac-af59328508d6.lovable.app-1782240365134.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5c27b4e3-923f-45ca-86bd-3e316f0a8404/id-preview-67ee19fb--52bf3ac4-970c-40f9-94ac-af59328508d6.lovable.app-1782240365134.png" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
