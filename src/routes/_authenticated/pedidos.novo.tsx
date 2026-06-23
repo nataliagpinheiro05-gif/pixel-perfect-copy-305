@@ -51,8 +51,8 @@ function NovoPedidoPage() {
   const { perfil } = useAuth();
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [itens, setItens] = useState<ItemCarrinho[]>([]);
-  const [formaPagamento, setFormaPagamento] = useState<string>("pix");
-  const [statusPagamento, setStatusPagamento] = useState<string>("pago");
+  const [formaPagamento] = useState<string | null>(null);
+  const [statusPagamento] = useState<string>("pendente");
   const [observacoes, setObservacoes] = useState("");
   const [produtoOpen, setProdutoOpen] = useState<Produto | null>(null);
   const [salvando, setSalvando] = useState(false);
@@ -197,36 +197,15 @@ function NovoPedidoPage() {
             </CardContent>
           </Card>
 
-          {/* Pagamento */}
+          {/* Observações — pagamento acontece após a entrega */}
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">3. Pagamento</CardTitle></CardHeader>
-            <CardContent className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <Label>Forma de pagamento</Label>
-                <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pix">Pix</SelectItem>
-                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                    <SelectItem value="debito">Débito</SelectItem>
-                    <SelectItem value="credito">Crédito</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Status</Label>
-                <Select value={statusPagamento} onValueChange={setStatusPagamento}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pago">Pago</SelectItem>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="sm:col-span-2">
-                <Label>Observações do pedido</Label>
-                <Textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Opcional" />
-              </div>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">3. Observações</CardTitle>
+              <p className="text-xs text-muted-foreground">O pedido entra no sistema e segue pelo fluxo: cozinha → produção → pronto → entrega → pagamento.</p>
+            </CardHeader>
+            <CardContent>
+              <Label>Observações do pedido</Label>
+              <Textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Opcional" />
             </CardContent>
           </Card>
         </div>

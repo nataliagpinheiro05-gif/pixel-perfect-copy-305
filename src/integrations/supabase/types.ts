@@ -862,7 +862,15 @@ export type Database = {
       forma_pagamento: "pix" | "dinheiro" | "debito" | "credito"
       status_entrega_kit: "pendente" | "em_producao" | "entregue" | "cancelado"
       status_pagamento: "pago" | "pendente" | "cancelado"
-      status_pedido: "em_preparo" | "pronto" | "entregue" | "cancelado"
+      status_pedido:
+        | "recebido"
+        | "em_preparo"
+        | "na_cozinha"
+        | "em_producao"
+        | "pronto"
+        | "em_entrega"
+        | "entregue"
+        | "cancelado"
       tipo_financeiro: "entrada" | "saida"
       tipo_mov_estoque:
         | "entrada"
@@ -1002,7 +1010,16 @@ export const Constants = {
       forma_pagamento: ["pix", "dinheiro", "debito", "credito"],
       status_entrega_kit: ["pendente", "em_producao", "entregue", "cancelado"],
       status_pagamento: ["pago", "pendente", "cancelado"],
-      status_pedido: ["em_preparo", "pronto", "entregue", "cancelado"],
+      status_pedido: [
+        "recebido",
+        "em_preparo",
+        "na_cozinha",
+        "em_producao",
+        "pronto",
+        "em_entrega",
+        "entregue",
+        "cancelado",
+      ],
       tipo_financeiro: ["entrada", "saida"],
       tipo_mov_estoque: [
         "entrada",
