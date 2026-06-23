@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { brl } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, Copy, Trash2, X } from "lucide-react";
-
+import { ArrowLeft, Copy, Trash2, X, CheckCircle2, Check } from "lucide-react";
+import { STAGES, STATUS_COLOR, STATUS_LABEL, nextStatus, NEXT_LABEL } from "@/lib/pedido-fluxo";
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
   head: () => ({ meta: [{ title: "Pedido — FitLounge" }] }),
@@ -43,6 +43,15 @@ function PedidoDetailPage() {
     else { toast.success("Atualizado"); qc.invalidateQueries({ queryKey: ["pedido", id] }); }
   }
 
+  async function avancar() {
+    const proximo = nextStatus(pedido.status_pedido);
+    if (proximo) await update({ status_pedido: proximo });
+  }
+
+  async function marcarPago(forma: string) {
+    await update({ forma_pagamento: forma, status_pagamento: "pago" });
+  }
+
   async function cancelar() {
     if (!confirm("Cancelar este pedido? O estoque e o financeiro serão revertidos.")) return;
     await update({ status_pedido: "cancelado", status_pagamento: "cancelado" });
@@ -59,8 +68,6 @@ function PedidoDetailPage() {
   async function duplicar() {
     const { data: novo, error } = await supabase.from("pedidos").insert({
       cliente_id: pedido.cliente_id,
-      forma_pagamento: pedido.forma_pagamento,
-      status_pagamento: "pendente",
       observacoes: pedido.observacoes,
       usuario_id: perfil?.id ?? null,
     }).select("id, numero").single();
@@ -76,20 +83,65 @@ function PedidoDetailPage() {
     navigate({ to: "/pedidos/$id" as any, params: { id: novo.id } as any });
   }
 
+  const proximo = nextStatus(pedido.status_pedido);
+  const cancelado = pedido.status_pedido === "cancelado";
+  const entregue = pedido.status_pedido === "entregue";
+  const pago = pedido.status_pagamento === "pago";
+  const stageIndex = STAGES.findIndex((s) => s.value === pedido.status_pedido || (s.value === "em_producao" && pedido.status_pedido === "em_preparo"));
+
   return (
     <AppShell>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/pedidos" as any })}><ArrowLeft className="size-4" /></Button>
-        <div className="flex-1">
+        <div className="flex-1 min-w-[180px]">
           <h1 className="text-2xl font-heading font-bold">Pedido #{pedido.numero}</h1>
           <p className="text-sm text-muted-foreground">{new Date(pedido.data_hora).toLocaleString("pt-BR")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={duplicar}><Copy className="size-4 mr-1" /> Duplicar</Button>
-        {pedido.status_pedido !== "cancelado" && (
-          <Button variant="outline" size="sm" onClick={cancelar}><X className="size-4 mr-1" /> Cancelar</Button>
-        )}
+        {!cancelado && <Button variant="outline" size="sm" onClick={cancelar}><X className="size-4 mr-1" /> Cancelar</Button>}
         {isAdmin && <Button variant="destructive" size="sm" onClick={excluir}><Trash2 className="size-4" /></Button>}
       </div>
+
+      {/* Progress / pipeline visual */}
+      {!cancelado && (
+        <Card className="p-4 mb-4">
+          <div className="flex items-center gap-1 overflow-x-auto pb-2">
+            {STAGES.map((s, i) => {
+              const ativo = i <= stageIndex;
+              const atual = i === stageIndex;
+              return (
+                <div key={s.value} className="flex items-center gap-1 shrink-0">
+                  <div className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border " + (atual ? "bg-primary text-primary-foreground border-primary" : ativo ? "bg-primary/10 text-primary border-primary/30" : "bg-muted text-muted-foreground border-border")}>
+                    {ativo && !atual && <Check className="size-3" />}
+                    {s.short}
+                  </div>
+                  {i < STAGES.length - 1 && <div className={"h-px w-4 " + (i < stageIndex ? "bg-primary" : "bg-border")} />}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {proximo && (
+              <Button onClick={avancar} className="bg-primary">
+                <CheckCircle2 className="size-4 mr-1" /> {NEXT_LABEL[pedido.status_pedido]}
+              </Button>
+            )}
+            {entregue && !pago && (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-sm font-medium mr-1">Receber pagamento:</span>
+                {(["pix", "dinheiro", "debito", "credito"] as const).map((f) => (
+                  <Button key={f} size="sm" variant="outline" onClick={() => marcarPago(f)} className="bg-gold/10 hover:bg-gold/20 border-gold/40">
+                    {f === "pix" ? "Pix" : f === "dinheiro" ? "Dinheiro" : f === "debito" ? "Débito" : "Crédito"}
+                  </Button>
+                ))}
+              </div>
+            )}
+            {entregue && pago && (
+              <Badge className="bg-green-600 text-white">✓ Pago em {pedido.forma_pagamento ?? "—"}</Badge>
+            )}
+          </div>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-[1fr_320px] gap-4">
         <Card className="p-4">
@@ -123,35 +175,19 @@ function PedidoDetailPage() {
             <Select value={pedido.status_pedido} onValueChange={(v) => update({ status_pedido: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="em_preparo">Em preparo</SelectItem>
-                <SelectItem value="pronto">Pronto</SelectItem>
-                <SelectItem value="entregue">Entregue</SelectItem>
+                {STAGES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 <SelectItem value="cancelado">Cancelado</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Pagamento</div>
-            <Select value={pedido.status_pagamento} onValueChange={(v) => update({ status_pagamento: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pago">Pago</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">Forma</div>
-            <Select value={pedido.forma_pagamento ?? ""} onValueChange={(v) => update({ forma_pagamento: v })}>
-              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pix">Pix</SelectItem>
-                <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                <SelectItem value="debito">Débito</SelectItem>
-                <SelectItem value="credito">Crédito</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="text-xs text-muted-foreground mb-1">Status pagamento</div>
+            <Badge variant="outline" className={STATUS_COLOR[pedido.status_pedido]}>{STATUS_LABEL[pedido.status_pedido]}</Badge>
+            <div className="mt-1">
+              <Badge variant="outline" className={pago ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-amber-500/10 text-amber-700 dark:text-amber-400"}>
+                {pago ? `Pago — ${pedido.forma_pagamento ?? "—"}` : "A pagar"}
+              </Badge>
+            </div>
           </div>
           <div className="pt-2 border-t border-border space-y-1 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{brl(pedido.subtotal)}</span></div>
