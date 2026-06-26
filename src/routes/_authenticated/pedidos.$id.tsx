@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -35,7 +35,7 @@ function PedidoDetailPage() {
     },
   });
 
-  if (!pedido) return <AppShell><p className="text-muted-foreground">Carregando...</p></AppShell>;
+  if (!pedido) return <><p className="text-muted-foreground">Carregando...</p></>;
 
   async function update(patch: any) {
     const { error } = await supabase.from("pedidos").update(patch).eq("id", id);
@@ -90,7 +90,7 @@ function PedidoDetailPage() {
   const stageIndex = STAGES.findIndex((s) => s.value === pedido.status_pedido || (s.value === "em_producao" && pedido.status_pedido === "em_preparo"));
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/pedidos" as any })}><ArrowLeft className="size-4" /></Button>
         <div className="flex-1 min-w-[180px]">
@@ -201,6 +201,6 @@ function PedidoDetailPage() {
           </div>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }

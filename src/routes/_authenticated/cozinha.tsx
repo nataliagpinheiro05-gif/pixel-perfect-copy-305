@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,7 +77,7 @@ function CozinhaPage() {
   }
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center gap-2 mb-4">
         <ChefHat className="size-6 text-primary" />
         <div>
@@ -152,6 +152,6 @@ function CozinhaPage() {
           );
         })}
       </div>
-    </AppShell>
+    </>
   );
 }

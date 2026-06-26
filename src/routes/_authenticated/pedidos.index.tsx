@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -50,7 +50,7 @@ function PedidosListPage() {
   }
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Receipt className="size-6 text-primary" />
@@ -96,6 +96,6 @@ function PedidosListPage() {
         })}
         {pedidos.length === 0 && <p className="text-center py-12 text-muted-foreground">Nenhum pedido nesse filtro.</p>}
       </div>
-    </AppShell>
+    </>
   );
 }

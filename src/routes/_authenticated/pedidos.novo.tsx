@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,7 +137,7 @@ function NovoPedidoPage() {
   }
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/" })}>
           <ArrowLeft className="size-4" />
@@ -256,7 +256,7 @@ function NovoPedidoPage() {
           onAdd={(item) => { setItens((arr) => [...arr, item]); setProdutoOpen(null); }}
         />
       )}
-    </AppShell>
+    </>
   );
 }
 
