@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/app-shell";
+
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,17 +45,17 @@ function ProdutosPage() {
 
   if (!isAdmin) {
     return (
-      <AppShell>
+      <>
         <div className="text-center py-16 text-muted-foreground">
           <ShieldOff className="size-12 mx-auto mb-3 opacity-50" />
           <p>Acesso restrito ao administrador.</p>
         </div>
-      </AppShell>
+      </>
     );
   }
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center gap-2 mb-4">
         <Package className="size-6 text-primary" />
         <h1 className="text-2xl font-heading font-bold">Produtos & Cardápio</h1>
@@ -74,7 +74,7 @@ function ProdutosPage() {
         <TabsContent value="sabores" className="mt-4"><SaboresTab /></TabsContent>
         <TabsContent value="adicionais" className="mt-4"><AdicionaisTab /></TabsContent>
       </Tabs>
-    </AppShell>
+    </>
   );
 }
 
