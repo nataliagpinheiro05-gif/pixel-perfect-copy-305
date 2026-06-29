@@ -38,6 +38,64 @@ export type Database = {
         }
         Relationships: []
       }
+      adicional_composicao: {
+        Row: {
+          adicional_id: string | null
+          ativo: boolean
+          created_at: string
+          estoque_item_id: string
+          id: string
+          nome_adicional: string | null
+          quantidade_utilizada: number
+          unidade_medida: string | null
+          updated_at: string
+        }
+        Insert: {
+          adicional_id?: string | null
+          ativo?: boolean
+          created_at?: string
+          estoque_item_id: string
+          id?: string
+          nome_adicional?: string | null
+          quantidade_utilizada?: number
+          unidade_medida?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adicional_id?: string | null
+          ativo?: boolean
+          created_at?: string
+          estoque_item_id?: string
+          id?: string
+          nome_adicional?: string | null
+          quantidade_utilizada?: number
+          unidade_medida?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adicional_composicao_adicional_id_fkey"
+            columns: ["adicional_id"]
+            isOneToOne: false
+            referencedRelation: "adicionais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adicional_composicao_estoque_item_id_fkey"
+            columns: ["estoque_item_id"]
+            isOneToOne: false
+            referencedRelation: "estoque_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adicional_composicao_estoque_item_id_fkey"
+            columns: ["estoque_item_id"]
+            isOneToOne: false
+            referencedRelation: "vw_estoque_alertas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caixa_movimentacoes: {
         Row: {
           caixa_id: string
@@ -251,31 +309,37 @@ export type Database = {
       configuracoes_loja: {
         Row: {
           cnpj: string | null
+          dias_alerta_vencimento: number
           endereco: string | null
           estoque_minimo_padrao: number
           id: string
           logo_url: string | null
           nome_loja: string
+          permitir_estoque_negativo: boolean
           telefone: string | null
           updated_at: string
         }
         Insert: {
           cnpj?: string | null
+          dias_alerta_vencimento?: number
           endereco?: string | null
           estoque_minimo_padrao?: number
           id?: string
           logo_url?: string | null
           nome_loja?: string
+          permitir_estoque_negativo?: boolean
           telefone?: string | null
           updated_at?: string
         }
         Update: {
           cnpj?: string | null
+          dias_alerta_vencimento?: number
           endereco?: string | null
           estoque_minimo_padrao?: number
           id?: string
           logo_url?: string | null
           nome_loja?: string
+          permitir_estoque_negativo?: boolean
           telefone?: string | null
           updated_at?: string
         }
@@ -283,42 +347,51 @@ export type Database = {
       }
       estoque_itens: {
         Row: {
+          alerta_vencimento_dias: number
           ativo: boolean
           categoria: string | null
           created_at: string
           custo_unitario: number
+          data_ultima_compra: string | null
           estoque_minimo: number
           fornecedor: string | null
           id: string
           nome: string
+          observacoes: string | null
           quantidade_atual: number
           unidade_medida: string
           updated_at: string
           validade: string | null
         }
         Insert: {
+          alerta_vencimento_dias?: number
           ativo?: boolean
           categoria?: string | null
           created_at?: string
           custo_unitario?: number
+          data_ultima_compra?: string | null
           estoque_minimo?: number
           fornecedor?: string | null
           id?: string
           nome: string
+          observacoes?: string | null
           quantidade_atual?: number
           unidade_medida?: string
           updated_at?: string
           validade?: string | null
         }
         Update: {
+          alerta_vencimento_dias?: number
           ativo?: boolean
           categoria?: string | null
           created_at?: string
           custo_unitario?: number
+          data_ultima_compra?: string | null
           estoque_minimo?: number
           fornecedor?: string | null
           id?: string
           nome?: string
+          observacoes?: string | null
           quantidade_atual?: number
           unidade_medida?: string
           updated_at?: string
@@ -334,7 +407,11 @@ export type Database = {
           item_id: string
           motivo: string | null
           pedido_id: string | null
+          pedido_item_id: string | null
+          produto_id: string | null
           quantidade: number
+          quantidade_anterior: number | null
+          quantidade_posterior: number | null
           tipo: Database["public"]["Enums"]["tipo_mov_estoque"]
           tipo_movimentacao: string | null
           usuario_id: string | null
@@ -346,7 +423,11 @@ export type Database = {
           item_id: string
           motivo?: string | null
           pedido_id?: string | null
+          pedido_item_id?: string | null
+          produto_id?: string | null
           quantidade: number
+          quantidade_anterior?: number | null
+          quantidade_posterior?: number | null
           tipo: Database["public"]["Enums"]["tipo_mov_estoque"]
           tipo_movimentacao?: string | null
           usuario_id?: string | null
@@ -358,7 +439,11 @@ export type Database = {
           item_id?: string
           motivo?: string | null
           pedido_id?: string | null
+          pedido_item_id?: string | null
+          produto_id?: string | null
           quantidade?: number
+          quantidade_anterior?: number | null
+          quantidade_posterior?: number | null
           tipo?: Database["public"]["Enums"]["tipo_mov_estoque"]
           tipo_movimentacao?: string | null
           usuario_id?: string | null
@@ -571,6 +656,7 @@ export type Database = {
           entregue_em: string | null
           envia_para_cozinha: boolean
           enviado_cozinha_em: string | null
+          estoque_baixado: boolean
           id: string
           motivo_cancelamento: string | null
           nome_produto: string
@@ -595,6 +681,7 @@ export type Database = {
           entregue_em?: string | null
           envia_para_cozinha?: boolean
           enviado_cozinha_em?: string | null
+          estoque_baixado?: boolean
           id?: string
           motivo_cancelamento?: string | null
           nome_produto: string
@@ -619,6 +706,7 @@ export type Database = {
           entregue_em?: string | null
           envia_para_cozinha?: boolean
           enviado_cozinha_em?: string | null
+          estoque_baixado?: boolean
           id?: string
           motivo_cancelamento?: string | null
           nome_produto?: string
@@ -895,22 +983,34 @@ export type Database = {
       }
       produto_composicao: {
         Row: {
+          ativo: boolean
           estoque_item_id: string
           id: string
+          obrigatorio: boolean
           produto_id: string
           quantidade_por_unidade: number
+          unidade_medida: string | null
+          updated_at: string
         }
         Insert: {
+          ativo?: boolean
           estoque_item_id: string
           id?: string
+          obrigatorio?: boolean
           produto_id: string
           quantidade_por_unidade?: number
+          unidade_medida?: string | null
+          updated_at?: string
         }
         Update: {
+          ativo?: boolean
           estoque_item_id?: string
           id?: string
+          obrigatorio?: boolean
           produto_id?: string
           quantidade_por_unidade?: number
+          unidade_medida?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1288,6 +1388,7 @@ export type Database = {
           entregue_em: string | null
           envia_para_cozinha: boolean
           enviado_cozinha_em: string | null
+          estoque_baixado: boolean
           id: string
           motivo_cancelamento: string | null
           nome_produto: string
@@ -1321,6 +1422,7 @@ export type Database = {
           entregue_em: string | null
           envia_para_cozinha: boolean
           enviado_cozinha_em: string | null
+          estoque_baixado: boolean
           id: string
           motivo_cancelamento: string | null
           nome_produto: string
@@ -1344,6 +1446,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      baixar_estoque_comanda: {
+        Args: { _forcar?: boolean; _pedido_id: string }
+        Returns: Json
+      }
       cancelar_item_comanda: {
         Args: { _item_id: string; _motivo?: string }
         Returns: {
@@ -1354,6 +1460,7 @@ export type Database = {
           entregue_em: string | null
           envia_para_cozinha: boolean
           enviado_cozinha_em: string | null
+          estoque_baixado: boolean
           id: string
           motivo_cancelamento: string | null
           nome_produto: string
@@ -1469,6 +1576,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      devolver_estoque_comanda: {
+        Args: { _motivo?: string; _pedido_id: string }
+        Returns: Json
       }
       estornar_lancamento: {
         Args: { _lancamento_id: string; _motivo: string }
@@ -1593,6 +1704,39 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       pode_financeiro: { Args: never; Returns: boolean }
       recalc_pedido_totais: { Args: { _pedido_id: string }; Returns: undefined }
+      registrar_entrada_estoque: {
+        Args: {
+          _custo_unitario?: number
+          _fornecedor?: string
+          _item_id: string
+          _observacoes?: string
+          _quantidade: number
+          _validade?: string
+        }
+        Returns: {
+          alerta_vencimento_dias: number
+          ativo: boolean
+          categoria: string | null
+          created_at: string
+          custo_unitario: number
+          data_ultima_compra: string | null
+          estoque_minimo: number
+          fornecedor: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          quantidade_atual: number
+          unidade_medida: string
+          updated_at: string
+          validade: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estoque_itens"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       registrar_pagamento_comanda: {
         Args: { _pagamentos: Json; _pedido_id: string }
         Returns: {
@@ -1655,6 +1799,36 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "caixa_movimentacoes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      registrar_saida_manual_estoque: {
+        Args: {
+          _item_id: string
+          _motivo?: string
+          _quantidade: number
+          _tipo_movimentacao: string
+        }
+        Returns: {
+          created_at: string
+          custo_unitario: number | null
+          id: string
+          item_id: string
+          motivo: string | null
+          pedido_id: string | null
+          pedido_item_id: string | null
+          produto_id: string | null
+          quantidade: number
+          quantidade_anterior: number | null
+          quantidade_posterior: number | null
+          tipo: Database["public"]["Enums"]["tipo_mov_estoque"]
+          tipo_movimentacao: string | null
+          usuario_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "estoque_movimentacoes"
           isOneToOne: true
           isSetofReturn: false
         }
