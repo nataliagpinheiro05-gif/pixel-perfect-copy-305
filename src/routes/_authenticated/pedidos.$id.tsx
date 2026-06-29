@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { brl } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, Copy, Trash2, X, CheckCircle2, Check } from "lucide-react";
+import { ArrowLeft, Copy, Trash2, X, CheckCircle2, Check, DollarSign } from "lucide-react";
 import { STAGES, STATUS_COLOR, STATUS_LABEL, nextStatus, NEXT_LABEL } from "@/lib/pedido-fluxo";
+import { ConfirmarPagamentoDialog } from "@/components/confirmar-pagamento-dialog";
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
   head: () => ({ meta: [{ title: "Pedido — FitLounge" }] }),
@@ -22,6 +23,7 @@ function PedidoDetailPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { isAdmin, perfil } = useAuth();
+  const [pagOpen, setPagOpen] = useState(false);
 
   const { data: pedido } = useQuery({
     queryKey: ["pedido", id],
@@ -29,13 +31,12 @@ function PedidoDetailPage() {
       const { data } = await supabase
         .from("pedidos")
         .select("*, cliente:clientes(id,nome,telefone), pedido_itens(*)")
-        .eq("id", id)
-        .maybeSingle();
+        .eq("id", id).maybeSingle();
       return data as any;
     },
   });
 
-  if (!pedido) return <><p className="text-muted-foreground">Carregando...</p></>;
+  if (!pedido) return <p className="text-muted-foreground">Carregando...</p>;
 
   async function update(patch: any) {
     const { error } = await supabase.from("pedidos").update(patch).eq("id", id);
@@ -48,13 +49,12 @@ function PedidoDetailPage() {
     if (proximo) await update({ status_pedido: proximo });
   }
 
-  async function marcarPago(forma: string) {
-    await update({ forma_pagamento: forma, status_pagamento: "pago" });
-  }
-
   async function cancelar() {
-    if (!confirm("Cancelar este pedido? O estoque e o financeiro serão revertidos.")) return;
-    await update({ status_pedido: "cancelado", status_pagamento: "cancelado" });
+    const motivo = prompt("Motivo do cancelamento (opcional):", "");
+    if (motivo === null) return;
+    const { error } = await supabase.rpc("cancelar_pedido", { _pedido_id: id, _motivo: motivo || undefined });
+    if (error) toast.error(error.message);
+    else { toast.success("Pedido cancelado"); qc.invalidateQueries({ queryKey: ["pedido", id] }); }
   }
 
   async function excluir() {
@@ -67,9 +67,7 @@ function PedidoDetailPage() {
 
   async function duplicar() {
     const { data: novo, error } = await supabase.from("pedidos").insert({
-      cliente_id: pedido.cliente_id,
-      observacoes: pedido.observacoes,
-      usuario_id: perfil?.id ?? null,
+      cliente_id: pedido.cliente_id, observacoes: pedido.observacoes, usuario_id: perfil?.id ?? null,
     }).select("id, numero").single();
     if (error || !novo) { toast.error(error?.message ?? "Erro"); return; }
     const itens = pedido.pedido_itens.map((it: any) => ({
@@ -85,7 +83,6 @@ function PedidoDetailPage() {
 
   const proximo = nextStatus(pedido.status_pedido);
   const cancelado = pedido.status_pedido === "cancelado";
-  const entregue = pedido.status_pedido === "entregue";
   const pago = pedido.status_pagamento === "pago";
   const stageIndex = STAGES.findIndex((s) => s.value === pedido.status_pedido || (s.value === "em_producao" && pedido.status_pedido === "em_preparo"));
 
@@ -102,13 +99,36 @@ function PedidoDetailPage() {
         {isAdmin && <Button variant="destructive" size="sm" onClick={excluir}><Trash2 className="size-4" /></Button>}
       </div>
 
-      {/* Progress / pipeline visual */}
+      {/* Botão grande de baixa */}
+      {!cancelado && !pago && (
+        <Card className="p-4 mb-4 bg-gradient-to-r from-gold/10 to-gold/5 border-gold/40">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div className="text-sm text-muted-foreground">Venda em aberto</div>
+              <div className="text-2xl font-bold text-primary">{brl(pedido.total)}</div>
+              <div className="text-xs text-muted-foreground">Confirme o pagamento para baixar estoque e lançar no financeiro.</div>
+            </div>
+            <Button size="lg" className="bg-gold text-gold-foreground hover:bg-gold/90 h-12" onClick={() => setPagOpen(true)}>
+              <DollarSign className="size-5 mr-2" /> Confirmar pagamento / Dar baixa
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {pago && (
+        <Card className="p-3 mb-4 bg-green-500/10 border-green-500/40">
+          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-semibold">
+            <CheckCircle2 className="size-5" /> Venda paga em {pedido.forma_pagamento ?? "—"} — {brl(pedido.valor_recebido ?? pedido.total)} recebido{pedido.estoque_baixado && " • estoque baixado ✓"}
+          </div>
+        </Card>
+      )}
+
+      {/* Pipeline visual */}
       {!cancelado && (
         <Card className="p-4 mb-4">
           <div className="flex items-center gap-1 overflow-x-auto pb-2">
             {STAGES.map((s, i) => {
-              const ativo = i <= stageIndex;
-              const atual = i === stageIndex;
+              const ativo = i <= stageIndex; const atual = i === stageIndex;
               return (
                 <div key={s.value} className="flex items-center gap-1 shrink-0">
                   <div className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border " + (atual ? "bg-primary text-primary-foreground border-primary" : ativo ? "bg-primary/10 text-primary border-primary/30" : "bg-muted text-muted-foreground border-border")}>
@@ -120,26 +140,11 @@ function PedidoDetailPage() {
               );
             })}
           </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {proximo && (
-              <Button onClick={avancar} className="bg-primary">
-                <CheckCircle2 className="size-4 mr-1" /> {NEXT_LABEL[pedido.status_pedido]}
-              </Button>
-            )}
-            {entregue && !pago && (
-              <div className="flex flex-wrap gap-1.5 items-center">
-                <span className="text-sm font-medium mr-1">Receber pagamento:</span>
-                {(["pix", "dinheiro", "debito", "credito"] as const).map((f) => (
-                  <Button key={f} size="sm" variant="outline" onClick={() => marcarPago(f)} className="bg-gold/10 hover:bg-gold/20 border-gold/40">
-                    {f === "pix" ? "Pix" : f === "dinheiro" ? "Dinheiro" : f === "debito" ? "Débito" : "Crédito"}
-                  </Button>
-                ))}
-              </div>
-            )}
-            {entregue && pago && (
-              <Badge className="bg-green-600 text-white">✓ Pago em {pedido.forma_pagamento ?? "—"}</Badge>
-            )}
-          </div>
+          {proximo && (
+            <Button onClick={avancar} className="mt-2 bg-primary">
+              <CheckCircle2 className="size-4 mr-1" /> {NEXT_LABEL[pedido.status_pedido]}
+            </Button>
+          )}
         </Card>
       )}
 
@@ -172,7 +177,7 @@ function PedidoDetailPage() {
         <Card className="p-4 space-y-3 h-fit">
           <div>
             <div className="text-xs text-muted-foreground mb-1">Status do pedido</div>
-            <Select value={pedido.status_pedido} onValueChange={(v) => update({ status_pedido: v })}>
+            <Select value={pedido.status_pedido} onValueChange={(v) => update({ status_pedido: v })} disabled={cancelado}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {STAGES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
@@ -181,13 +186,10 @@ function PedidoDetailPage() {
             </Select>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Status pagamento</div>
-            <Badge variant="outline" className={STATUS_COLOR[pedido.status_pedido]}>{STATUS_LABEL[pedido.status_pedido]}</Badge>
-            <div className="mt-1">
-              <Badge variant="outline" className={pago ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-amber-500/10 text-amber-700 dark:text-amber-400"}>
-                {pago ? `Pago — ${pedido.forma_pagamento ?? "—"}` : "A pagar"}
-              </Badge>
-            </div>
+            <div className="text-xs text-muted-foreground mb-1">Pagamento</div>
+            <Badge variant="outline" className={pago ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-amber-500/10 text-amber-700 dark:text-amber-400"}>
+              {pago ? `Pago — ${pedido.forma_pagamento ?? "—"}` : cancelado ? "Cancelado" : "Pendente"}
+            </Badge>
           </div>
           <div className="pt-2 border-t border-border space-y-1 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{brl(pedido.subtotal)}</span></div>
@@ -199,8 +201,17 @@ function PedidoDetailPage() {
             )}
             <div className="flex justify-between text-lg font-bold pt-1"><span>Total</span><span className="text-primary">{brl(pedido.total)}</span></div>
           </div>
+          <Badge variant="outline" className={STATUS_COLOR[pedido.status_pedido]}>{STATUS_LABEL[pedido.status_pedido]}</Badge>
         </Card>
       </div>
+
+      {pagOpen && (
+        <ConfirmarPagamentoDialog
+          pedidoId={id} numero={pedido.numero} total={Number(pedido.total)}
+          open={pagOpen} onClose={() => setPagOpen(false)}
+          onConfirmed={() => qc.invalidateQueries({ queryKey: ["pedido", id] })}
+        />
+      )}
     </>
   );
 }
