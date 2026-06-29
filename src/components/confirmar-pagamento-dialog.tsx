@@ -45,7 +45,7 @@ export function ConfirmarPagamentoDialog({
       _pedido_id: pedidoId,
       _forma_pagamento: forma as any,
       _valor_recebido: Number(valor) || total,
-      _observacoes: obs || null,
+      _observacoes: obs || undefined,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
