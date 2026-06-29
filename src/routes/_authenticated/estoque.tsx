@@ -225,7 +225,7 @@ function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
             </TabsContent>
           </Tabs>
           <div><Label>Quantidade ({item.unidade_medida})</Label><Input type="number" step="0.01" value={qtd} onChange={e => setQtd(Number(e.target.value))} /></div>
-          <div><Label>Motivo / observação</Label><Textarea value={motivo} onChange={e => setMotivo(e.target.value)} /></div>
+          <div><Label>Motivo / observação {tipo === "saida" && <span className="text-destructive">*</span>}</Label><Textarea value={motivo} onChange={e => setMotivo(e.target.value)} placeholder={tipo === "saida" ? "Obrigatório descrever o motivo" : "Opcional"} /></div>
           <div className="text-sm text-muted-foreground">Saldo atual: <span className="font-semibold">{item.quantidade_atual}</span> → Após: <span className="font-semibold">{tipo === "entrada" ? Number(item.quantidade_atual) + qtd : Number(item.quantidade_atual) - qtd}</span></div>
         </div>
         <DialogFooter><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button onClick={salvar} disabled={saving}>{saving ? "Salvando..." : "Confirmar"}</Button></DialogFooter>
