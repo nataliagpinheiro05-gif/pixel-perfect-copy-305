@@ -470,7 +470,7 @@ function ItemConfigDialog({ produto, pedidoId, onBack, onClose, onAdded }: {
   );
 }
 
-// ─────────────────────────── FECHAR CONTA ───────────────────────────
+// ─────────────────────────── FECHAR CONTA (pagamento único/misto/parcial) ───────────────────────────
 
 type Forma = "pix" | "dinheiro" | "debito" | "credito";
 const FORMAS: { value: Forma; label: string; icon: any }[] = [
@@ -480,43 +480,92 @@ const FORMAS: { value: Forma; label: string; icon: any }[] = [
   { value: "credito", label: "Crédito", icon: Wallet },
 ];
 
+type Linha = { id: string; forma: Forma; valor: string; recebido: string; obs: string };
+
 function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose, onClosed }: {
   pedidoId: string; numero: number; subtotal: number; descontoAtual: number;
   onClose: () => void; onClosed: () => void;
 }) {
   const [desconto, setDesconto] = useState<string>(String(descontoAtual || 0));
-  const [forma, setForma] = useState<Forma | null>(null);
-  const [valor, setValor] = useState<string>("");
-  const [obs, setObs] = useState("");
+  const [linhas, setLinhas] = useState<Linha[]>([
+    { id: crypto.randomUUID(), forma: "pix", valor: "", recebido: "", obs: "" },
+  ]);
   const [saving, setSaving] = useState(false);
 
-  const total = Math.max(subtotal - (Number(desconto) || 0), 0);
-  const recebido = Number(valor) || 0;
-  const troco = forma === "dinheiro" && recebido > total ? recebido - total : 0;
+  const { data: pagamentosPrev = [] } = useQuery({
+    queryKey: ["pagamentos-pedido", pedidoId],
+    queryFn: async () => {
+      const { data } = await supabase.from("pedido_pagamentos")
+        .select("id,forma_pagamento,valor,troco,created_at,status")
+        .eq("pedido_id", pedidoId).eq("status", "confirmado")
+        .order("created_at", { ascending: true });
+      return data ?? [];
+    },
+  });
 
-  async function fechar() {
-    if (!forma) { toast.error("Escolha a forma de pagamento"); return; }
+  const total = Math.max(subtotal - (Number(desconto) || 0), 0);
+  const jaPago = pagamentosPrev.reduce((s, p: any) => s + Number(p.valor), 0);
+  const restanteAntes = Math.max(total - jaPago, 0);
+  const somaNovos = linhas.reduce((s, l) => s + (Number(l.valor) || 0), 0);
+  const restanteApos = Math.max(restanteAntes - somaNovos, 0);
+  const trocoTotal = linhas.reduce((s, l) => {
+    const v = Number(l.valor) || 0;
+    const r = Number(l.recebido) || 0;
+    return s + (l.forma === "dinheiro" && r > v ? r - v : 0);
+  }, 0);
+
+  function preencherRestante(idx: number) {
+    setLinhas(arr => arr.map((l, i) => i === idx ? { ...l, valor: restanteAntes.toFixed(2) } : l));
+  }
+
+  function adicionar() {
+    setLinhas(arr => [...arr, { id: crypto.randomUUID(), forma: "dinheiro", valor: "", recebido: "", obs: "" }]);
+  }
+
+  function remover(id: string) {
+    setLinhas(arr => arr.filter(l => l.id !== id));
+  }
+
+  async function registrar(modo: "completo" | "parcial") {
+    const pagamentos = linhas
+      .filter(l => Number(l.valor) > 0)
+      .map(l => ({
+        forma: l.forma,
+        valor: Number(l.valor),
+        valor_recebido: l.forma === "dinheiro" && Number(l.recebido) > 0 ? Number(l.recebido) : Number(l.valor),
+        observacoes: l.obs || undefined,
+      }));
+    if (pagamentos.length === 0) { toast.error("Adicione ao menos um pagamento."); return; }
+    if (modo === "completo" && Math.abs(somaNovos - restanteAntes) > 0.005) {
+      toast.error(`Soma dos pagamentos (${brl(somaNovos)}) não bate com o restante (${brl(restanteAntes)})`);
+      return;
+    }
+
     setSaving(true);
-    const { error } = await supabase.rpc("fechar_comanda", {
+    // Aplica desconto/total antes de registrar pagamento
+    if (Number(desconto) !== descontoAtual) {
+      const { error } = await supabase.from("pedidos").update({ desconto: Number(desconto) || 0 }).eq("id", pedidoId);
+      if (error) { setSaving(false); toast.error(error.message); return; }
+    }
+    const { error } = await supabase.rpc("registrar_pagamento_comanda", {
       _pedido_id: pedidoId,
-      _forma_pagamento: forma as any,
-      _valor_recebido: (valor ? Number(valor) : total) as any,
-      _desconto: Number(desconto) || 0,
-      _observacoes: (obs || null) as any,
+      _pagamentos: pagamentos as any,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(`Comanda #${numero} fechada — pagamento registrado`);
+    toast.success(modo === "completo"
+      ? `Comanda #${numero} paga — pagamento registrado`
+      : `Pagamento parcial registrado em #${numero}`);
     onClosed();
   }
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Fechar conta · Comanda #{numero}</DialogTitle>
           <DialogDescription>
-            O pagamento é feito fora do app. Aqui você registra apenas a forma usada.
+            Pagamento feito fora do app. Registre uma ou mais formas. Soma deve bater com o total da comanda.
           </DialogDescription>
         </DialogHeader>
 
@@ -528,51 +577,102 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
               <Input type="number" step="0.01" value={desconto} onChange={(e) => setDesconto(e.target.value)} className="w-28 h-8 text-right" />
             </div>
             <div className="flex justify-between text-lg font-bold pt-1 border-t border-border">
-              <span>Total a receber</span>
+              <span>Total da comanda</span>
               <span className="text-primary">{brl(total)}</span>
             </div>
+            {jaPago > 0 && (
+              <>
+                <div className="flex justify-between text-sm pt-1 border-t border-border"><span className="text-muted-foreground">Já recebido</span><span className="text-green-700 font-semibold">{brl(jaPago)}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Restante</span><span className="text-amber-700 font-semibold">{brl(restanteAntes)}</span></div>
+              </>
+            )}
           </div>
+
+          {pagamentosPrev.length > 0 && (
+            <Card className="p-3 text-xs">
+              <div className="font-semibold mb-1">Pagamentos anteriores</div>
+              <ul className="space-y-0.5">
+                {pagamentosPrev.map((p: any) => (
+                  <li key={p.id} className="flex justify-between">
+                    <span className="capitalize">{p.forma_pagamento} · {new Date(p.created_at).toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span className="font-semibold">{brl(p.valor)}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           <div>
-            <Label className="mb-2 block">Forma de pagamento *</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {FORMAS.map((f) => {
-                const Icon = f.icon; const ativo = forma === f.value;
-                return (
-                  <button key={f.value} onClick={() => setForma(f.value)}
-                    className={"flex items-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors " +
-                      (ativo ? "border-gold bg-gold/10 text-gold-foreground" : "border-border hover:border-primary/40")}>
-                    <Icon className="size-4" /> {f.label}
-                  </button>
-                );
-              })}
+            <div className="flex items-center justify-between mb-2">
+              <Label>Novos pagamentos</Label>
+              <Button type="button" variant="outline" size="sm" onClick={adicionar}><Plus className="size-3 mr-1" /> Adicionar forma</Button>
             </div>
+            <ul className="space-y-2">
+              {linhas.map((l, idx) => (
+                <li key={l.id} className="rounded-lg border border-border p-2 space-y-2">
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {FORMAS.map((f) => {
+                      const Icon = f.icon; const ativo = l.forma === f.value;
+                      return (
+                        <button key={f.value} onClick={() => setLinhas(arr => arr.map((x, i) => i === idx ? { ...x, forma: f.value } : x))}
+                          className={"flex items-center justify-center gap-1 rounded-md border p-1.5 text-xs font-medium transition-colors " +
+                            (ativo ? "border-gold bg-gold/10 text-gold-foreground" : "border-border hover:border-primary/40")}>
+                          <Icon className="size-3" /> {f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
+                    <div>
+                      <Label className="text-xs">Valor *</Label>
+                      <div className="flex gap-1">
+                        <Input type="number" step="0.01" value={l.valor}
+                          onChange={(e) => setLinhas(arr => arr.map((x, i) => i === idx ? { ...x, valor: e.target.value } : x))}
+                          placeholder="0,00" />
+                        <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => preencherRestante(idx)} title="Preencher com o restante">
+                          {brl(restanteAntes)}
+                        </Button>
+                      </div>
+                    </div>
+                    {l.forma === "dinheiro" ? (
+                      <div>
+                        <Label className="text-xs">Recebido (p/ troco)</Label>
+                        <Input type="number" step="0.01" value={l.recebido}
+                          onChange={(e) => setLinhas(arr => arr.map((x, i) => i === idx ? { ...x, recebido: e.target.value } : x))}
+                          placeholder={l.valor || "0,00"} />
+                      </div>
+                    ) : <div />}
+                    {linhas.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" onClick={() => remover(l.id)} className="text-destructive">
+                        <Trash2 className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Valor recebido</Label>
-              <Input type="number" step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} placeholder={String(total.toFixed(2))} />
+          <div className="rounded-lg bg-muted/40 p-3 text-sm space-y-1">
+            <div className="flex justify-between"><span className="text-muted-foreground">Soma dos novos pagamentos</span><span className="font-semibold">{brl(somaNovos)}</span></div>
+            {trocoTotal > 0 && <div className="flex justify-between"><span className="text-muted-foreground">Troco</span><span>{brl(trocoTotal)}</span></div>}
+            <div className="flex justify-between"><span className="text-muted-foreground">Restante após registro</span>
+              <span className={"font-semibold " + (restanteApos < 0.005 ? "text-green-700" : "text-amber-700")}>{brl(restanteApos)}</span>
             </div>
-            <div>
-              <Label>Troco</Label>
-              <Input value={troco > 0 ? brl(troco) : "—"} readOnly className="bg-muted" />
-            </div>
-          </div>
-
-          <div>
-            <Label>Observações</Label>
-            <Textarea rows={2} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Opcional" />
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
           <Button variant="ghost" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button onClick={fechar} disabled={saving || !forma} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            <CheckCircle2 className="size-4 mr-1" /> {saving ? "Fechando..." : "Confirmar pagamento e fechar comanda"}
+          <Button variant="outline" onClick={() => registrar("parcial")} disabled={saving || somaNovos <= 0}>
+            Registrar parcial
+          </Button>
+          <Button onClick={() => registrar("completo")} disabled={saving || somaNovos <= 0} className="bg-gold text-gold-foreground hover:bg-gold/90">
+            <CheckCircle2 className="size-4 mr-1" /> {saving ? "Registrando..." : "Confirmar e fechar comanda"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
