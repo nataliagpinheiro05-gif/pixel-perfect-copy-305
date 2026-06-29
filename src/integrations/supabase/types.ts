@@ -399,44 +399,74 @@ export type Database = {
       pedido_itens: {
         Row: {
           adicionais: Json
+          cancelado_em: string | null
           created_at: string
           custo_unitario: number
+          entregue_em: string | null
+          envia_para_cozinha: boolean
+          enviado_cozinha_em: string | null
           id: string
+          motivo_cancelamento: string | null
           nome_produto: string
           observacoes: string | null
+          observacoes_cozinha: string | null
           pedido_id: string
           preco_unitario: number
+          preparo_iniciado_em: string | null
           produto_id: string | null
+          pronto_em: string | null
           quantidade: number
+          rodada: number
           sabor: string | null
+          status_preparo: string
           subtotal: number
         }
         Insert: {
           adicionais?: Json
+          cancelado_em?: string | null
           created_at?: string
           custo_unitario?: number
+          entregue_em?: string | null
+          envia_para_cozinha?: boolean
+          enviado_cozinha_em?: string | null
           id?: string
+          motivo_cancelamento?: string | null
           nome_produto: string
           observacoes?: string | null
+          observacoes_cozinha?: string | null
           pedido_id: string
           preco_unitario?: number
+          preparo_iniciado_em?: string | null
           produto_id?: string | null
+          pronto_em?: string | null
           quantidade?: number
+          rodada?: number
           sabor?: string | null
+          status_preparo?: string
           subtotal?: number
         }
         Update: {
           adicionais?: Json
+          cancelado_em?: string | null
           created_at?: string
           custo_unitario?: number
+          entregue_em?: string | null
+          envia_para_cozinha?: boolean
+          enviado_cozinha_em?: string | null
           id?: string
+          motivo_cancelamento?: string | null
           nome_produto?: string
           observacoes?: string | null
+          observacoes_cozinha?: string | null
           pedido_id?: string
           preco_unitario?: number
+          preparo_iniciado_em?: string | null
           produto_id?: string | null
+          pronto_em?: string | null
           quantidade?: number
+          rodada?: number
           sabor?: string | null
+          status_preparo?: string
           subtotal?: number
         }
         Relationships: [
@@ -458,15 +488,19 @@ export type Database = {
       }
       pedidos: {
         Row: {
+          aberta_em: string | null
           baixado_por: string | null
           cancelado_em: string | null
           cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
           created_at: string
           custo_total: number
           data_hora: string
           desconto: number
           estoque_baixado: boolean
           estoque_baixado_em: string | null
+          fechada_em: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           lucro_estimado: number
@@ -474,24 +508,31 @@ export type Database = {
           numero: number
           observacoes: string | null
           pago_em: string | null
+          status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
           subtotal: number
+          tipo_registro: string
           total: number
+          troco: number | null
           updated_at: string
           usuario_id: string | null
           valor_recebido: number | null
         }
         Insert: {
+          aberta_em?: string | null
           baixado_por?: string | null
           cancelado_em?: string | null
           cliente_id?: string | null
+          cliente_nome_rapido?: string | null
+          cliente_telefone_rapido?: string | null
           created_at?: string
           custo_total?: number
           data_hora?: string
           desconto?: number
           estoque_baixado?: boolean
           estoque_baixado_em?: string | null
+          fechada_em?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
@@ -501,24 +542,31 @@ export type Database = {
           numero?: number
           observacoes?: string | null
           pago_em?: string | null
+          status_comanda?: string
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
           subtotal?: number
+          tipo_registro?: string
           total?: number
+          troco?: number | null
           updated_at?: string
           usuario_id?: string | null
           valor_recebido?: number | null
         }
         Update: {
+          aberta_em?: string | null
           baixado_por?: string | null
           cancelado_em?: string | null
           cliente_id?: string | null
+          cliente_nome_rapido?: string | null
+          cliente_telefone_rapido?: string | null
           created_at?: string
           custo_total?: number
           data_hora?: string
           desconto?: number
           estoque_baixado?: boolean
           estoque_baixado_em?: string | null
+          fechada_em?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
@@ -528,10 +576,13 @@ export type Database = {
           numero?: number
           observacoes?: string | null
           pago_em?: string | null
+          status_comanda?: string
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
           subtotal?: number
+          tipo_registro?: string
           total?: number
+          troco?: number | null
           updated_at?: string
           usuario_id?: string | null
           valor_recebido?: number | null
@@ -672,11 +723,15 @@ export type Database = {
           created_at: string
           custo: number
           descricao: string | null
+          envia_para_cozinha: boolean
           estoque_minimo: number
           id: string
           lucro: number | null
           nome: string
+          permite_adicionais: boolean
+          permite_sabor: boolean
           preco: number
+          produto_fechado: boolean
           updated_at: string
         }
         Insert: {
@@ -687,11 +742,15 @@ export type Database = {
           created_at?: string
           custo?: number
           descricao?: string | null
+          envia_para_cozinha?: boolean
           estoque_minimo?: number
           id?: string
           lucro?: number | null
           nome: string
+          permite_adicionais?: boolean
+          permite_sabor?: boolean
           preco?: number
+          produto_fechado?: boolean
           updated_at?: string
         }
         Update: {
@@ -702,11 +761,15 @@ export type Database = {
           created_at?: string
           custo?: number
           descricao?: string | null
+          envia_para_cozinha?: boolean
           estoque_minimo?: number
           id?: string
           lucro?: number | null
           nome?: string
+          permite_adicionais?: boolean
+          permite_sabor?: boolean
           preco?: number
+          produto_fechado?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -865,18 +928,27 @@ export type Database = {
       }
     }
     Functions: {
-      cancelar_pedido: {
-        Args: { _motivo?: string; _pedido_id: string }
+      abrir_comanda: {
+        Args: {
+          _cliente_id?: string
+          _cliente_nome?: string
+          _cliente_telefone?: string
+          _observacoes?: string
+        }
         Returns: {
+          aberta_em: string | null
           baixado_por: string | null
           cancelado_em: string | null
           cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
           created_at: string
           custo_total: number
           data_hora: string
           desconto: number
           estoque_baixado: boolean
           estoque_baixado_em: string | null
+          fechada_em: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           lucro_estimado: number
@@ -884,10 +956,160 @@ export type Database = {
           numero: number
           observacoes: string | null
           pago_em: string | null
+          status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
           subtotal: number
+          tipo_registro: string
           total: number
+          troco: number | null
+          updated_at: string
+          usuario_id: string | null
+          valor_recebido: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      adicionar_item_comanda: {
+        Args: {
+          _adicionais?: Json
+          _observacoes?: string
+          _pedido_id: string
+          _produto_id: string
+          _quantidade?: number
+          _sabor?: string
+        }
+        Returns: {
+          adicionais: Json
+          cancelado_em: string | null
+          created_at: string
+          custo_unitario: number
+          entregue_em: string | null
+          envia_para_cozinha: boolean
+          enviado_cozinha_em: string | null
+          id: string
+          motivo_cancelamento: string | null
+          nome_produto: string
+          observacoes: string | null
+          observacoes_cozinha: string | null
+          pedido_id: string
+          preco_unitario: number
+          preparo_iniciado_em: string | null
+          produto_id: string | null
+          pronto_em: string | null
+          quantidade: number
+          rodada: number
+          sabor: string | null
+          status_preparo: string
+          subtotal: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedido_itens"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      avancar_item_preparo: {
+        Args: { _item_id: string; _novo_status: string }
+        Returns: {
+          adicionais: Json
+          cancelado_em: string | null
+          created_at: string
+          custo_unitario: number
+          entregue_em: string | null
+          envia_para_cozinha: boolean
+          enviado_cozinha_em: string | null
+          id: string
+          motivo_cancelamento: string | null
+          nome_produto: string
+          observacoes: string | null
+          observacoes_cozinha: string | null
+          pedido_id: string
+          preco_unitario: number
+          preparo_iniciado_em: string | null
+          produto_id: string | null
+          pronto_em: string | null
+          quantidade: number
+          rodada: number
+          sabor: string | null
+          status_preparo: string
+          subtotal: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedido_itens"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancelar_item_comanda: {
+        Args: { _item_id: string; _motivo?: string }
+        Returns: {
+          adicionais: Json
+          cancelado_em: string | null
+          created_at: string
+          custo_unitario: number
+          entregue_em: string | null
+          envia_para_cozinha: boolean
+          enviado_cozinha_em: string | null
+          id: string
+          motivo_cancelamento: string | null
+          nome_produto: string
+          observacoes: string | null
+          observacoes_cozinha: string | null
+          pedido_id: string
+          preco_unitario: number
+          preparo_iniciado_em: string | null
+          produto_id: string | null
+          pronto_em: string | null
+          quantidade: number
+          rodada: number
+          sabor: string | null
+          status_preparo: string
+          subtotal: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedido_itens"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancelar_pedido: {
+        Args: { _motivo?: string; _pedido_id: string }
+        Returns: {
+          aberta_em: string | null
+          baixado_por: string | null
+          cancelado_em: string | null
+          cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
+          created_at: string
+          custo_total: number
+          data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
+          fechada_em: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          lucro_estimado: number
+          motivo_cancelamento: string | null
+          numero: number
+          observacoes: string | null
+          pago_em: string | null
+          status_comanda: string
+          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
+          status_pedido: Database["public"]["Enums"]["status_pedido"]
+          subtotal: number
+          tipo_registro: string
+          total: number
+          troco: number | null
           updated_at: string
           usuario_id: string | null
           valor_recebido: number | null
@@ -907,15 +1129,19 @@ export type Database = {
           _valor_recebido?: number
         }
         Returns: {
+          aberta_em: string | null
           baixado_por: string | null
           cancelado_em: string | null
           cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
           created_at: string
           custo_total: number
           data_hora: string
           desconto: number
           estoque_baixado: boolean
           estoque_baixado_em: string | null
+          fechada_em: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           lucro_estimado: number
@@ -923,10 +1149,60 @@ export type Database = {
           numero: number
           observacoes: string | null
           pago_em: string | null
+          status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
           subtotal: number
+          tipo_registro: string
           total: number
+          troco: number | null
+          updated_at: string
+          usuario_id: string | null
+          valor_recebido: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fechar_comanda: {
+        Args: {
+          _desconto?: number
+          _forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          _observacoes?: string
+          _pedido_id: string
+          _valor_recebido?: number
+        }
+        Returns: {
+          aberta_em: string | null
+          baixado_por: string | null
+          cancelado_em: string | null
+          cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
+          created_at: string
+          custo_total: number
+          data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
+          fechada_em: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          lucro_estimado: number
+          motivo_cancelamento: string | null
+          numero: number
+          observacoes: string | null
+          pago_em: string | null
+          status_comanda: string
+          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
+          status_pedido: Database["public"]["Enums"]["status_pedido"]
+          subtotal: number
+          tipo_registro: string
+          total: number
+          troco: number | null
           updated_at: string
           usuario_id: string | null
           valor_recebido: number | null

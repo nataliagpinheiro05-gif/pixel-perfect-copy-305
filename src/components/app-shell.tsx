@@ -17,6 +17,7 @@ import {
   LogOut,
   Leaf,
   Menu,
+  Receipt,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -41,9 +42,10 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, mobilePrimary: true },
-  { to: "/pedidos/novo", label: "Novo Pedido", icon: Plus, mobilePrimary: true },
+  { to: "/pedidos/novo", label: "Nova comanda", icon: Plus, mobilePrimary: true },
+  { to: "/pedidos", label: "Comandas", icon: Receipt, mobilePrimary: true },
   { to: "/cozinha", label: "Cozinha", icon: ChefHat, mobilePrimary: true },
-  { to: "/clientes", label: "Clientes", icon: Users, mobilePrimary: true },
+  { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/estoque", label: "Estoque", icon: Boxes },
   { to: "/meu-slim", label: "Meu Slim", icon: Sparkles },
@@ -241,7 +243,7 @@ function QuickActions() {
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuLabel>Ação rápida</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild><Link to={"/pedidos/novo" as any}>Novo pedido</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to={"/pedidos/novo" as any}>Nova comanda</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link to={"/clientes/novo" as any}>Novo cliente</Link></DropdownMenuItem>
         {podeFinanceiro && <DropdownMenuItem asChild><Link to={"/financeiro/nova-saida" as any}>Nova saída financeira</Link></DropdownMenuItem>}
         <DropdownMenuItem asChild><Link to={"/estoque/entrada" as any}>Entrada de estoque</Link></DropdownMenuItem>

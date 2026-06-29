@@ -35,6 +35,10 @@ type Produto = {
   custo: number;
   ativo: boolean;
   aparece_no_pedido: boolean;
+  envia_para_cozinha: boolean;
+  produto_fechado: boolean;
+  permite_sabor: boolean;
+  permite_adicionais: boolean;
   categoria?: { nome: string } | null;
   produto_sabores?: { sabor_id: string }[];
   produto_adicionais?: { adicional_id: string }[];
@@ -171,6 +175,8 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
   const [form, setForm] = useState({
     nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0",
     ativo: true, aparece_no_pedido: true,
+    envia_para_cozinha: true, produto_fechado: false,
+    permite_sabor: false, permite_adicionais: false,
     sabores: [] as string[], adicionais: [] as string[],
   });
 
@@ -180,11 +186,21 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
         nome: produto.nome, descricao: produto.descricao ?? "",
         categoria_id: produto.categoria_id ?? "", preco: String(produto.preco), custo: String(produto.custo),
         ativo: produto.ativo, aparece_no_pedido: produto.aparece_no_pedido,
+        envia_para_cozinha: produto.envia_para_cozinha ?? true,
+        produto_fechado: produto.produto_fechado ?? false,
+        permite_sabor: produto.permite_sabor ?? false,
+        permite_adicionais: produto.permite_adicionais ?? false,
         sabores: (produto.produto_sabores ?? []).map((s) => s.sabor_id),
         adicionais: (produto.produto_adicionais ?? []).map((a) => a.adicional_id),
       });
     } else {
-      setForm({ nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0", ativo: true, aparece_no_pedido: true, sabores: [], adicionais: [] });
+      setForm({
+        nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0",
+        ativo: true, aparece_no_pedido: true,
+        envia_para_cozinha: true, produto_fechado: false,
+        permite_sabor: false, permite_adicionais: false,
+        sabores: [], adicionais: [],
+      });
     }
   }
 
@@ -201,6 +217,10 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
       custo: Number(form.custo) || 0,
       ativo: form.ativo,
       aparece_no_pedido: form.aparece_no_pedido,
+      envia_para_cozinha: form.envia_para_cozinha,
+      produto_fechado: form.produto_fechado,
+      permite_sabor: form.permite_sabor,
+      permite_adicionais: form.permite_adicionais,
     };
     let prodId = produto?.id;
     if (produto) {
@@ -253,9 +273,13 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
             <div><Label>Custo (R$)</Label><Input type="number" step="0.01" value={form.custo} onChange={(e) => setForm({ ...form, custo: e.target.value })} /></div>
           </div>
 
-          <div className="flex gap-6">
+          <div className="grid sm:grid-cols-2 gap-2 rounded-lg border border-border p-3">
             <label className="flex items-center gap-2 text-sm"><Switch checked={form.ativo} onCheckedChange={(v) => setForm({ ...form, ativo: v })} /> Ativo</label>
-            <label className="flex items-center gap-2 text-sm"><Switch checked={form.aparece_no_pedido} onCheckedChange={(v) => setForm({ ...form, aparece_no_pedido: v })} /> Aparece no pedido</label>
+            <label className="flex items-center gap-2 text-sm"><Switch checked={form.aparece_no_pedido} onCheckedChange={(v) => setForm({ ...form, aparece_no_pedido: v })} /> Aparece na comanda</label>
+            <label className="flex items-center gap-2 text-sm"><Switch checked={form.envia_para_cozinha} onCheckedChange={(v) => setForm({ ...form, envia_para_cozinha: v })} /> Envia para cozinha</label>
+            <label className="flex items-center gap-2 text-sm"><Switch checked={form.produto_fechado} onCheckedChange={(v) => setForm({ ...form, produto_fechado: v })} /> Produto fechado (pronto)</label>
+            <label className="flex items-center gap-2 text-sm"><Switch checked={form.permite_sabor} onCheckedChange={(v) => setForm({ ...form, permite_sabor: v })} /> Permite escolher sabor</label>
+            <label className="flex items-center gap-2 text-sm"><Switch checked={form.permite_adicionais} onCheckedChange={(v) => setForm({ ...form, permite_adicionais: v })} /> Permite adicionais</label>
           </div>
 
           <div>
