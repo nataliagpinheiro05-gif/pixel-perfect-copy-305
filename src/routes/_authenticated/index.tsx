@@ -48,13 +48,16 @@ function Dashboard() {
   });
 
   const validos = (pedidos ?? []).filter((p: any) => p.status_pedido !== "cancelado");
-  const faturamento = validos.reduce((acc: number, p: any) => acc + Number(p.total), 0);
-  const lucro = validos.reduce((acc: number, p: any) => acc + Number(p.lucro_estimado), 0);
-  const ticket = validos.length ? faturamento / validos.length : 0;
+  const pagas = validos.filter((p: any) => p.status_pagamento === "pago");
+  const pendentes = validos.filter((p: any) => p.status_pagamento === "pendente");
+  const faturamento = pagas.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const aReceber = pendentes.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const lucro = pagas.reduce((acc: number, p: any) => acc + Number(p.lucro_estimado), 0);
+  const ticket = pagas.length ? faturamento / pagas.length : 0;
 
   const porPagamento = ["pix", "dinheiro", "debito", "credito"].map((fp) => ({
     nome: fp.charAt(0).toUpperCase() + fp.slice(1),
-    valor: validos.filter((p: any) => p.forma_pagamento === fp).reduce((a: number, p: any) => a + Number(p.total), 0),
+    valor: pagas.filter((p: any) => p.forma_pagamento === fp).reduce((a: number, p: any) => a + Number(p.total), 0),
   }));
 
   const { data: topProdutos } = useQuery({
@@ -138,13 +141,13 @@ function Dashboard() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Kpi title="Faturamento" value={brl(faturamento)} icon={TrendingUp} accent="primary" />
-        <Kpi title="Pedidos" value={num(validos.length)} icon={Receipt} accent="gold" />
-        <Kpi title="Ticket médio" value={brl(ticket)} icon={Wallet} accent="success" />
+        <Kpi title="Faturamento (pago)" value={brl(faturamento)} icon={TrendingUp} accent="primary" />
+        <Kpi title="A receber" value={brl(aReceber)} icon={Wallet} accent="warning" />
+        <Kpi title="Vendas pagas" value={num(pagas.length)} icon={Receipt} accent="gold" />
         {podeFinanceiro ? (
           <Kpi title="Lucro estimado" value={brl(lucro)} icon={TrendingUp} accent="gold" />
         ) : (
-          <Kpi title="Em preparo" value={num(emPreparo?.length ?? 0)} icon={ChefHat} accent="warning" />
+          <Kpi title="Ticket médio" value={brl(ticket)} icon={Wallet} accent="success" />
         )}
       </div>
 

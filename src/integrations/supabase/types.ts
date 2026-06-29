@@ -183,6 +183,7 @@ export type Database = {
           pedido_id: string | null
           quantidade: number
           tipo: Database["public"]["Enums"]["tipo_mov_estoque"]
+          tipo_movimentacao: string | null
           usuario_id: string | null
         }
         Insert: {
@@ -194,6 +195,7 @@ export type Database = {
           pedido_id?: string | null
           quantidade: number
           tipo: Database["public"]["Enums"]["tipo_mov_estoque"]
+          tipo_movimentacao?: string | null
           usuario_id?: string | null
         }
         Update: {
@@ -205,6 +207,7 @@ export type Database = {
           pedido_id?: string | null
           quantidade?: number
           tipo?: Database["public"]["Enums"]["tipo_mov_estoque"]
+          tipo_movimentacao?: string | null
           usuario_id?: string | null
         }
         Relationships: [
@@ -230,11 +233,15 @@ export type Database = {
           created_at: string
           data: string
           descricao: string
+          estorno_de: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           meu_slim_venda_id: string | null
           observacoes: string | null
           pedido_id: string | null
+          referencia_id: string | null
+          referencia_tipo: string | null
+          status: string
           tipo: Database["public"]["Enums"]["tipo_financeiro"]
           usuario_id: string | null
           valor: number
@@ -244,6 +251,7 @@ export type Database = {
           created_at?: string
           data?: string
           descricao: string
+          estorno_de?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
@@ -251,6 +259,9 @@ export type Database = {
           meu_slim_venda_id?: string | null
           observacoes?: string | null
           pedido_id?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          status?: string
           tipo: Database["public"]["Enums"]["tipo_financeiro"]
           usuario_id?: string | null
           valor: number
@@ -260,6 +271,7 @@ export type Database = {
           created_at?: string
           data?: string
           descricao?: string
+          estorno_de?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
@@ -267,11 +279,21 @@ export type Database = {
           meu_slim_venda_id?: string | null
           observacoes?: string | null
           pedido_id?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          status?: string
           tipo?: Database["public"]["Enums"]["tipo_financeiro"]
           usuario_id?: string | null
           valor?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "financeiro_lancamentos_estorno_de_fkey"
+            columns: ["estorno_de"]
+            isOneToOne: false
+            referencedRelation: "financeiro_lancamentos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "financeiro_lancamentos_meu_slim_venda_id_fkey"
             columns: ["meu_slim_venda_id"]
@@ -436,59 +458,83 @@ export type Database = {
       }
       pedidos: {
         Row: {
+          baixado_por: string | null
+          cancelado_em: string | null
           cliente_id: string | null
           created_at: string
           custo_total: number
           data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           lucro_estimado: number
+          motivo_cancelamento: string | null
           numero: number
           observacoes: string | null
+          pago_em: string | null
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
           subtotal: number
           total: number
           updated_at: string
           usuario_id: string | null
+          valor_recebido: number | null
         }
         Insert: {
+          baixado_por?: string | null
+          cancelado_em?: string | null
           cliente_id?: string | null
           created_at?: string
           custo_total?: number
           data_hora?: string
+          desconto?: number
+          estoque_baixado?: boolean
+          estoque_baixado_em?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
           id?: string
           lucro_estimado?: number
+          motivo_cancelamento?: string | null
           numero?: number
           observacoes?: string | null
+          pago_em?: string | null
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
           subtotal?: number
           total?: number
           updated_at?: string
           usuario_id?: string | null
+          valor_recebido?: number | null
         }
         Update: {
+          baixado_por?: string | null
+          cancelado_em?: string | null
           cliente_id?: string | null
           created_at?: string
           custo_total?: number
           data_hora?: string
+          desconto?: number
+          estoque_baixado?: boolean
+          estoque_baixado_em?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
           id?: string
           lucro_estimado?: number
+          motivo_cancelamento?: string | null
           numero?: number
           observacoes?: string | null
+          pago_em?: string | null
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
           subtotal?: number
           total?: number
           updated_at?: string
           usuario_id?: string | null
+          valor_recebido?: number | null
         }
         Relationships: [
           {
@@ -819,6 +865,79 @@ export type Database = {
       }
     }
     Functions: {
+      cancelar_pedido: {
+        Args: { _motivo?: string; _pedido_id: string }
+        Returns: {
+          baixado_por: string | null
+          cancelado_em: string | null
+          cliente_id: string | null
+          created_at: string
+          custo_total: number
+          data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          lucro_estimado: number
+          motivo_cancelamento: string | null
+          numero: number
+          observacoes: string | null
+          pago_em: string | null
+          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
+          status_pedido: Database["public"]["Enums"]["status_pedido"]
+          subtotal: number
+          total: number
+          updated_at: string
+          usuario_id: string | null
+          valor_recebido: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      confirmar_pagamento_pedido: {
+        Args: {
+          _forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          _observacoes?: string
+          _pedido_id: string
+          _valor_recebido?: number
+        }
+        Returns: {
+          baixado_por: string | null
+          cancelado_em: string | null
+          cliente_id: string | null
+          created_at: string
+          custo_total: number
+          data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          lucro_estimado: number
+          motivo_cancelamento: string | null
+          numero: number
+          observacoes: string | null
+          pago_em: string | null
+          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
+          status_pedido: Database["public"]["Enums"]["status_pedido"]
+          subtotal: number
+          total: number
+          updated_at: string
+          usuario_id: string | null
+          valor_recebido: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
