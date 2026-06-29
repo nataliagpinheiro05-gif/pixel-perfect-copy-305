@@ -48,13 +48,16 @@ function Dashboard() {
   });
 
   const validos = (pedidos ?? []).filter((p: any) => p.status_pedido !== "cancelado");
-  const faturamento = validos.reduce((acc: number, p: any) => acc + Number(p.total), 0);
-  const lucro = validos.reduce((acc: number, p: any) => acc + Number(p.lucro_estimado), 0);
-  const ticket = validos.length ? faturamento / validos.length : 0;
+  const pagas = validos.filter((p: any) => p.status_pagamento === "pago");
+  const pendentes = validos.filter((p: any) => p.status_pagamento === "pendente");
+  const faturamento = pagas.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const aReceber = pendentes.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const lucro = pagas.reduce((acc: number, p: any) => acc + Number(p.lucro_estimado), 0);
+  const ticket = pagas.length ? faturamento / pagas.length : 0;
 
   const porPagamento = ["pix", "dinheiro", "debito", "credito"].map((fp) => ({
     nome: fp.charAt(0).toUpperCase() + fp.slice(1),
-    valor: validos.filter((p: any) => p.forma_pagamento === fp).reduce((a: number, p: any) => a + Number(p.total), 0),
+    valor: pagas.filter((p: any) => p.forma_pagamento === fp).reduce((a: number, p: any) => a + Number(p.total), 0),
   }));
 
   const { data: topProdutos } = useQuery({
