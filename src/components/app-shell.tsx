@@ -17,6 +17,7 @@ import {
   LogOut,
   Leaf,
   Menu,
+  Receipt,
 } from "lucide-react";
 import {
   DropdownMenu,
