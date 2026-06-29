@@ -141,13 +141,13 @@ function Dashboard() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Kpi title="Faturamento" value={brl(faturamento)} icon={TrendingUp} accent="primary" />
-        <Kpi title="Pedidos" value={num(validos.length)} icon={Receipt} accent="gold" />
-        <Kpi title="Ticket médio" value={brl(ticket)} icon={Wallet} accent="success" />
+        <Kpi title="Faturamento (pago)" value={brl(faturamento)} icon={TrendingUp} accent="primary" />
+        <Kpi title="A receber" value={brl(aReceber)} icon={Wallet} accent="warning" />
+        <Kpi title="Vendas pagas" value={num(pagas.length)} icon={Receipt} accent="gold" />
         {podeFinanceiro ? (
           <Kpi title="Lucro estimado" value={brl(lucro)} icon={TrendingUp} accent="gold" />
         ) : (
-          <Kpi title="Em preparo" value={num(emPreparo?.length ?? 0)} icon={ChefHat} accent="warning" />
+          <Kpi title="Ticket médio" value={brl(ticket)} icon={Wallet} accent="success" />
         )}
       </div>
 
