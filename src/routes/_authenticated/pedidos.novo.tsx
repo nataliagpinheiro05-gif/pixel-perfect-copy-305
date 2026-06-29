@@ -39,10 +39,10 @@ function NovaComandaPage() {
     }
     setAbrindo(true);
     const { data, error } = await supabase.rpc("abrir_comanda", {
-      _cliente_id: modo === "cadastrado" ? cliente!.id : null,
-      _cliente_nome: modo === "rapido" ? nomeRapido.trim() : modo === "balcao" ? "Consumidor balcão" : null,
-      _cliente_telefone: modo === "rapido" ? telRapido.replace(/\D/g, "") : null,
-      _observacoes: obs || null,
+      _cliente_id: modo === "cadastrado" ? cliente!.id : (null as any),
+      _cliente_nome: modo === "rapido" ? nomeRapido.trim() : modo === "balcao" ? "Consumidor balcão" : (null as any),
+      _cliente_telefone: modo === "rapido" ? telRapido.replace(/\D/g, "") : (null as any),
+      _observacoes: (obs || null) as any,
     });
     setAbrindo(false);
     if (error || !data) {
