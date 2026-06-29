@@ -51,7 +51,9 @@ const NAV: NavItem[] = [
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/estoque", label: "Estoque", icon: Boxes },
+  { to: "/composicao", label: "Composição", icon: Blocks, adminOnly: true },
   { to: "/meu-slim", label: "Meu Slim", icon: Sparkles },
+
   { to: "/financeiro", label: "Financeiro", icon: Wallet, financeiroOnly: true },
   { to: "/caixa", label: "Caixa", icon: Banknote },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
