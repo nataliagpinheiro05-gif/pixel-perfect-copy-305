@@ -20,6 +20,7 @@ import {
   Receipt,
   Banknote,
   Blocks,
+  ShieldCheck,
 
 } from "lucide-react";
 import {
@@ -57,6 +58,7 @@ const NAV: NavItem[] = [
   { to: "/financeiro", label: "Financeiro", icon: Wallet, financeiroOnly: true },
   { to: "/caixa", label: "Caixa", icon: Banknote },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
+  { to: "/auditoria", label: "Auditoria", icon: ShieldCheck, adminOnly: true },
   { to: "/configuracoes", label: "Configurações", icon: Settings, adminOnly: true },
 ];
 

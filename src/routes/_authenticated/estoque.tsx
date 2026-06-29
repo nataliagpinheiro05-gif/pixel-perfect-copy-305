@@ -162,7 +162,6 @@ function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void })
 }
 
 function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
-  const { perfil } = useAuth();
   const [tipo, setTipo] = useState<"entrada" | "saida">("entrada");
   const [tipoMov, setTipoMov] = useState("compra");
   const [qtd, setQtd] = useState(0);
@@ -171,16 +170,24 @@ function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
 
   async function salvar() {
     if (qtd <= 0) { toast.error("Quantidade > 0"); return; }
+    if (tipo === "saida" && !motivo.trim()) { toast.error("Motivo obrigatório para saída/ajuste"); return; }
     setSaving(true);
-    const nova = tipo === "entrada" ? Number(item.quantidade_atual) + qtd : Number(item.quantidade_atual) - qtd;
-    const { error: e1 } = await supabase.from("estoque_itens").update({ quantidade_atual: nova }).eq("id", item.id);
-    if (e1) { setSaving(false); toast.error(e1.message); return; }
-    const { error: e2 } = await supabase.from("estoque_movimentacoes").insert({
-      item_id: item.id, tipo, tipo_movimentacao: tipoMov, quantidade: qtd,
-      motivo: motivo || tipoMov, usuario_id: perfil?.id ?? null,
-    });
-    setSaving(false);
-    if (e2) { toast.error(e2.message); return; }
+
+    if (tipo === "entrada") {
+      const { error } = await supabase.rpc("registrar_entrada_estoque", {
+        _item_id: item.id, _quantidade: qtd,
+        _observacoes: motivo || tipoMov,
+      });
+      setSaving(false);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { error } = await supabase.rpc("registrar_saida_manual_estoque", {
+        _item_id: item.id, _quantidade: qtd,
+        _tipo_movimentacao: tipoMov, _motivo: motivo,
+      });
+      setSaving(false);
+      if (error) { toast.error(error.message); return; }
+    }
     toast.success("Movimentação registrada"); onClose();
   }
 
@@ -217,7 +224,7 @@ function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
             </TabsContent>
           </Tabs>
           <div><Label>Quantidade ({item.unidade_medida})</Label><Input type="number" step="0.01" value={qtd} onChange={e => setQtd(Number(e.target.value))} /></div>
-          <div><Label>Motivo / observação</Label><Textarea value={motivo} onChange={e => setMotivo(e.target.value)} /></div>
+          <div><Label>Motivo / observação {tipo === "saida" && <span className="text-destructive">*</span>}</Label><Textarea value={motivo} onChange={e => setMotivo(e.target.value)} placeholder={tipo === "saida" ? "Obrigatório descrever o motivo" : "Opcional"} /></div>
           <div className="text-sm text-muted-foreground">Saldo atual: <span className="font-semibold">{item.quantidade_atual}</span> → Após: <span className="font-semibold">{tipo === "entrada" ? Number(item.quantidade_atual) + qtd : Number(item.quantidade_atual) - qtd}</span></div>
         </div>
         <DialogFooter><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button onClick={salvar} disabled={saving}>{saving ? "Salvando..." : "Confirmar"}</Button></DialogFooter>
