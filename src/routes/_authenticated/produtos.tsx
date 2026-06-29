@@ -175,6 +175,8 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
   const [form, setForm] = useState({
     nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0",
     ativo: true, aparece_no_pedido: true,
+    envia_para_cozinha: true, produto_fechado: false,
+    permite_sabor: false, permite_adicionais: false,
     sabores: [] as string[], adicionais: [] as string[],
   });
 
@@ -184,11 +186,21 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
         nome: produto.nome, descricao: produto.descricao ?? "",
         categoria_id: produto.categoria_id ?? "", preco: String(produto.preco), custo: String(produto.custo),
         ativo: produto.ativo, aparece_no_pedido: produto.aparece_no_pedido,
+        envia_para_cozinha: produto.envia_para_cozinha ?? true,
+        produto_fechado: produto.produto_fechado ?? false,
+        permite_sabor: produto.permite_sabor ?? false,
+        permite_adicionais: produto.permite_adicionais ?? false,
         sabores: (produto.produto_sabores ?? []).map((s) => s.sabor_id),
         adicionais: (produto.produto_adicionais ?? []).map((a) => a.adicional_id),
       });
     } else {
-      setForm({ nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0", ativo: true, aparece_no_pedido: true, sabores: [], adicionais: [] });
+      setForm({
+        nome: "", descricao: "", categoria_id: "", preco: "0", custo: "0",
+        ativo: true, aparece_no_pedido: true,
+        envia_para_cozinha: true, produto_fechado: false,
+        permite_sabor: false, permite_adicionais: false,
+        sabores: [], adicionais: [],
+      });
     }
   }
 
@@ -205,6 +217,10 @@ function ProdutoDialog({ open, onOpenChange, produto }: { open: boolean; onOpenC
       custo: Number(form.custo) || 0,
       ativo: form.ativo,
       aparece_no_pedido: form.aparece_no_pedido,
+      envia_para_cozinha: form.envia_para_cozinha,
+      produto_fechado: form.produto_fechado,
+      permite_sabor: form.permite_sabor,
+      permite_adicionais: form.permite_adicionais,
     };
     let prodId = produto?.id;
     if (produto) {
