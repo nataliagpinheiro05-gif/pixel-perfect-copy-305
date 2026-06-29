@@ -312,6 +312,7 @@ export type Database = {
           dias_alerta_vencimento: number
           endereco: string | null
           estoque_minimo_padrao: number
+          formas_pagamento_ativas: Json
           id: string
           logo_url: string | null
           nome_loja: string
@@ -324,6 +325,7 @@ export type Database = {
           dias_alerta_vencimento?: number
           endereco?: string | null
           estoque_minimo_padrao?: number
+          formas_pagamento_ativas?: Json
           id?: string
           logo_url?: string | null
           nome_loja?: string
@@ -336,6 +338,7 @@ export type Database = {
           dias_alerta_vencimento?: number
           endereco?: string | null
           estoque_minimo_padrao?: number
+          formas_pagamento_ativas?: Json
           id?: string
           logo_url?: string | null
           nome_loja?: string
@@ -830,9 +833,12 @@ export type Database = {
           id: string
           lucro_estimado: number
           motivo_cancelamento: string | null
+          motivo_reabertura: string | null
           numero: number
           observacoes: string | null
           pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
           status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
@@ -867,9 +873,12 @@ export type Database = {
           id?: string
           lucro_estimado?: number
           motivo_cancelamento?: string | null
+          motivo_reabertura?: string | null
           numero?: number
           observacoes?: string | null
           pago_em?: string | null
+          reaberta_em?: string | null
+          reaberta_por?: string | null
           status_comanda?: string
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
@@ -904,9 +913,12 @@ export type Database = {
           id?: string
           lucro_estimado?: number
           motivo_cancelamento?: string | null
+          motivo_reabertura?: string | null
           numero?: number
           observacoes?: string | null
           pago_em?: string | null
+          reaberta_em?: string | null
+          reaberta_por?: string | null
           status_comanda?: string
           status_pagamento?: Database["public"]["Enums"]["status_pagamento"]
           status_pedido?: Database["public"]["Enums"]["status_pedido"]
@@ -1348,9 +1360,12 @@ export type Database = {
           id: string
           lucro_estimado: number
           motivo_cancelamento: string | null
+          motivo_reabertura: string | null
           numero: number
           observacoes: string | null
           pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
           status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
@@ -1484,6 +1499,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancelar_lancamento_financeiro: {
+        Args: { _id: string; _motivo: string }
+        Returns: {
+          caixa_id: string | null
+          categoria: string
+          created_at: string
+          data: string
+          data_lancamento: string
+          descricao: string
+          estorno_de: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          meu_slim_venda_id: string | null
+          observacoes: string | null
+          pedido_id: string | null
+          referencia_id: string | null
+          referencia_tipo: string | null
+          status: string
+          tipo: Database["public"]["Enums"]["tipo_financeiro"]
+          usuario_id: string | null
+          valor: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "financeiro_lancamentos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cancelar_pedido: {
         Args: { _motivo?: string; _pedido_id: string }
         Returns: {
@@ -1505,58 +1549,12 @@ export type Database = {
           id: string
           lucro_estimado: number
           motivo_cancelamento: string | null
+          motivo_reabertura: string | null
           numero: number
           observacoes: string | null
           pago_em: string | null
-          status_comanda: string
-          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
-          status_pedido: Database["public"]["Enums"]["status_pedido"]
-          subtotal: number
-          tipo_registro: string
-          total: number
-          troco: number | null
-          updated_at: string
-          usuario_id: string | null
-          valor_pago: number
-          valor_pendente: number
-          valor_recebido: number | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "pedidos"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      confirmar_pagamento_pedido: {
-        Args: {
-          _forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
-          _observacoes?: string
-          _pedido_id: string
-          _valor_recebido?: number
-        }
-        Returns: {
-          aberta_em: string | null
-          baixado_por: string | null
-          caixa_id: string | null
-          cancelado_em: string | null
-          cliente_id: string | null
-          cliente_nome_rapido: string | null
-          cliente_telefone_rapido: string | null
-          created_at: string
-          custo_total: number
-          data_hora: string
-          desconto: number
-          estoque_baixado: boolean
-          estoque_baixado_em: string | null
-          fechada_em: string | null
-          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
-          id: string
-          lucro_estimado: number
-          motivo_cancelamento: string | null
-          numero: number
-          observacoes: string | null
-          pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
           status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
@@ -1671,9 +1669,12 @@ export type Database = {
           id: string
           lucro_estimado: number
           motivo_cancelamento: string | null
+          motivo_reabertura: string | null
           numero: number
           observacoes: string | null
           pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
           status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
@@ -1703,6 +1704,53 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       pode_financeiro: { Args: never; Returns: boolean }
+      reabrir_comanda: {
+        Args: { _motivo: string; _pedido_id: string }
+        Returns: {
+          aberta_em: string | null
+          baixado_por: string | null
+          caixa_id: string | null
+          cancelado_em: string | null
+          cliente_id: string | null
+          cliente_nome_rapido: string | null
+          cliente_telefone_rapido: string | null
+          created_at: string
+          custo_total: number
+          data_hora: string
+          desconto: number
+          estoque_baixado: boolean
+          estoque_baixado_em: string | null
+          fechada_em: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          lucro_estimado: number
+          motivo_cancelamento: string | null
+          motivo_reabertura: string | null
+          numero: number
+          observacoes: string | null
+          pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
+          status_comanda: string
+          status_pagamento: Database["public"]["Enums"]["status_pagamento"]
+          status_pedido: Database["public"]["Enums"]["status_pedido"]
+          subtotal: number
+          tipo_registro: string
+          total: number
+          troco: number | null
+          updated_at: string
+          usuario_id: string | null
+          valor_pago: number
+          valor_pendente: number
+          valor_recebido: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pedidos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       recalc_pedido_totais: { Args: { _pedido_id: string }; Returns: undefined }
       registrar_entrada_estoque: {
         Args: {
@@ -1758,9 +1806,12 @@ export type Database = {
           id: string
           lucro_estimado: number
           motivo_cancelamento: string | null
+          motivo_reabertura: string | null
           numero: number
           observacoes: string | null
           pago_em: string | null
+          reaberta_em: string | null
+          reaberta_por: string | null
           status_comanda: string
           status_pagamento: Database["public"]["Enums"]["status_pagamento"]
           status_pedido: Database["public"]["Enums"]["status_pedido"]
