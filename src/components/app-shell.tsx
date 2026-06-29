@@ -18,6 +18,7 @@ import {
   Leaf,
   Menu,
   Receipt,
+  Banknote,
 } from "lucide-react";
 import {
   DropdownMenu,
