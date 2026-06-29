@@ -35,6 +35,10 @@ type Produto = {
   custo: number;
   ativo: boolean;
   aparece_no_pedido: boolean;
+  envia_para_cozinha: boolean;
+  produto_fechado: boolean;
+  permite_sabor: boolean;
+  permite_adicionais: boolean;
   categoria?: { nome: string } | null;
   produto_sabores?: { sabor_id: string }[];
   produto_adicionais?: { adicional_id: string }[];
