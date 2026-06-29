@@ -162,7 +162,6 @@ function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void })
 }
 
 function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
-  const { perfil } = useAuth();
   const [tipo, setTipo] = useState<"entrada" | "saida">("entrada");
   const [tipoMov, setTipoMov] = useState("compra");
   const [qtd, setQtd] = useState(0);
