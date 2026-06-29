@@ -20,6 +20,7 @@ import {
   Receipt,
   Banknote,
   Blocks,
+  ShieldCheck,
 
 } from "lucide-react";
 import {
