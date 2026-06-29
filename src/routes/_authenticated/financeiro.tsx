@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, Plus, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
+import { Wallet, Plus, TrendingUp, TrendingDown, Ban, Undo2 } from "lucide-react";
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, subDays, startOfYear } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
@@ -88,12 +88,21 @@ function FinanceiroPage() {
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
   }, [saidas]);
 
-  async function excluir(id: string) {
+  async function cancelar(id: string) {
     if (!isAdmin) return;
-    if (!confirm("Excluir lançamento?")) return;
-    const { error } = await supabase.from("financeiro_lancamentos").delete().eq("id", id);
+    const motivo = prompt("Motivo do cancelamento:");
+    if (!motivo) return;
+    const { error } = await supabase.rpc("cancelar_lancamento_financeiro", { _id: id, _motivo: motivo });
     if (error) toast.error(error.message);
-    else { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["financ"] }); }
+    else { toast.success("Lançamento cancelado"); qc.invalidateQueries({ queryKey: ["financ"] }); }
+  }
+  async function estornar(id: string) {
+    if (!isAdmin) return;
+    const motivo = prompt("Motivo do estorno (gera lançamento reverso):");
+    if (!motivo) return;
+    const { error } = await supabase.rpc("estornar_lancamento", { _lancamento_id: id, _motivo: motivo });
+    if (error) toast.error(error.message);
+    else { toast.success("Lançamento estornado"); qc.invalidateQueries({ queryKey: ["financ"] }); }
   }
 
   return (
@@ -150,7 +159,10 @@ function FinanceiroPage() {
                     <td className={`text-right font-semibold ${l.tipo === "entrada" ? "text-green-600" : "text-red-600"}`}>
                       {l.tipo === "entrada" ? "+" : "−"}{brl(l.valor)}
                     </td>
-                    <td className="text-right pr-3">{isAdmin && l.tipo === "saida" && <Button variant="ghost" size="icon" className="size-7" onClick={() => excluir(l.id)}><Trash2 className="size-3.5" /></Button>}</td>
+                    <td className="text-right pr-3 whitespace-nowrap">{isAdmin && (<>
+                      <Button variant="ghost" size="icon" className="size-7" title="Cancelar lançamento" onClick={() => cancelar(l.id)}><Ban className="size-3.5 text-amber-600" /></Button>
+                      <Button variant="ghost" size="icon" className="size-7" title="Estornar (gera reverso)" onClick={() => estornar(l.id)}><Undo2 className="size-3.5 text-red-600" /></Button>
+                    </>)}</td>
                   </tr>
                 ))}
                 {lancs.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-muted-foreground">Sem lançamentos.</td></tr>}
