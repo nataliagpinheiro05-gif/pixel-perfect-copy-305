@@ -243,7 +243,7 @@ function QuickActions() {
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuLabel>Ação rápida</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild><Link to={"/pedidos/novo" as any}>Novo pedido</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to={"/pedidos/novo" as any}>Nova comanda</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link to={"/clientes/novo" as any}>Novo cliente</Link></DropdownMenuItem>
         {podeFinanceiro && <DropdownMenuItem asChild><Link to={"/financeiro/nova-saida" as any}>Nova saída financeira</Link></DropdownMenuItem>}
         <DropdownMenuItem asChild><Link to={"/estoque/entrada" as any}>Entrada de estoque</Link></DropdownMenuItem>
