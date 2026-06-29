@@ -96,6 +96,45 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          acao: string
+          created_at: string
+          descricao: string | null
+          entidade: string
+          entidade_id: string | null
+          id: string
+          metadata: Json | null
+          motivo: string | null
+          usuario_id: string | null
+          usuario_nome: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          descricao?: string | null
+          entidade: string
+          entidade_id?: string | null
+          id?: string
+          metadata?: Json | null
+          motivo?: string | null
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          descricao?: string | null
+          entidade?: string
+          entidade_id?: string | null
+          id?: string
+          metadata?: Json | null
+          motivo?: string | null
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Relationships: []
+      }
       caixa_movimentacoes: {
         Row: {
           caixa_id: string
@@ -1703,6 +1742,17 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      log_audit: {
+        Args: {
+          _acao: string
+          _descricao?: string
+          _entidade: string
+          _entidade_id: string
+          _metadata?: Json
+          _motivo?: string
+        }
+        Returns: undefined
+      }
       pode_financeiro: { Args: never; Returns: boolean }
       reabrir_comanda: {
         Args: { _motivo: string; _pedido_id: string }
@@ -1857,7 +1907,7 @@ export type Database = {
       registrar_saida_manual_estoque: {
         Args: {
           _item_id: string
-          _motivo?: string
+          _motivo: string
           _quantidade: number
           _tipo_movimentacao: string
         }
