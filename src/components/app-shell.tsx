@@ -41,9 +41,10 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, mobilePrimary: true },
-  { to: "/pedidos/novo", label: "Novo Pedido", icon: Plus, mobilePrimary: true },
+  { to: "/pedidos/novo", label: "Nova comanda", icon: Plus, mobilePrimary: true },
+  { to: "/pedidos", label: "Comandas", icon: Receipt, mobilePrimary: true },
   { to: "/cozinha", label: "Cozinha", icon: ChefHat, mobilePrimary: true },
-  { to: "/clientes", label: "Clientes", icon: Users, mobilePrimary: true },
+  { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/estoque", label: "Estoque", icon: Boxes },
   { to: "/meu-slim", label: "Meu Slim", icon: Sparkles },
