@@ -245,11 +245,24 @@ function ComandaDetailPage() {
             </>
           )}
           {paga && (
-            <Card className="p-3 bg-green-500/10 border-green-500/40">
-              <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-semibold">
-                <CheckCircle2 className="size-5" /> Comanda paga
-              </div>
-            </Card>
+            <>
+              <Card className="p-3 bg-green-500/10 border-green-500/40">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-semibold">
+                  <CheckCircle2 className="size-5" /> Comanda paga
+                </div>
+              </Card>
+              {isAdmin && (
+                <Button variant="outline" className="w-full" onClick={async () => {
+                  const motivo = prompt("Motivo da reabertura (obrigatório):");
+                  if (!motivo) return;
+                  const { error } = await supabase.rpc("reabrir_comanda", { _pedido_id: id, _motivo: motivo });
+                  if (error) toast.error(error.message);
+                  else { toast.success("Comanda reaberta — estoque devolvido e financeiro estornado"); qc.invalidateQueries({ queryKey: ["comanda", id] }); }
+                }}>
+                  Reabrir comanda
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
