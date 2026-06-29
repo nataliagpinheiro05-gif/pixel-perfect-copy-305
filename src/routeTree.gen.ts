@@ -19,6 +19,7 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedCozinhaRouteImport } from './routes/_authenticated/cozinha'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedComposicaoRouteImport } from './routes/_authenticated/composicao'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedCaixaRouteImport } from './routes/_authenticated/caixa'
 import { Route as AuthenticatedPedidosIndexRouteImport } from './routes/_authenticated/pedidos.index'
@@ -75,6 +76,11 @@ const AuthenticatedConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedComposicaoRoute = AuthenticatedComposicaoRouteImport.update({
+  id: '/composicao',
+  path: '/composicao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/caixa': typeof AuthenticatedCaixaRoute
   '/clientes': typeof AuthenticatedClientesRoute
+  '/composicao': typeof AuthenticatedComposicaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/cozinha': typeof AuthenticatedCozinhaRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/caixa': typeof AuthenticatedCaixaRoute
   '/clientes': typeof AuthenticatedClientesRoute
+  '/composicao': typeof AuthenticatedComposicaoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/cozinha': typeof AuthenticatedCozinhaRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/caixa': typeof AuthenticatedCaixaRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
+  '/_authenticated/composicao': typeof AuthenticatedComposicaoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/cozinha': typeof AuthenticatedCozinhaRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/caixa'
     | '/clientes'
+    | '/composicao'
     | '/configuracoes'
     | '/cozinha'
     | '/estoque'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/caixa'
     | '/clientes'
+    | '/composicao'
     | '/configuracoes'
     | '/cozinha'
     | '/estoque'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/caixa'
     | '/_authenticated/clientes'
+    | '/_authenticated/composicao'
     | '/_authenticated/configuracoes'
     | '/_authenticated/cozinha'
     | '/_authenticated/estoque'
@@ -282,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/composicao': {
+      id: '/_authenticated/composicao'
+      path: '/composicao'
+      fullPath: '/composicao'
+      preLoaderRoute: typeof AuthenticatedComposicaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clientes': {
       id: '/_authenticated/clientes'
       path: '/clientes'
@@ -323,6 +342,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCaixaRoute: typeof AuthenticatedCaixaRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
+  AuthenticatedComposicaoRoute: typeof AuthenticatedComposicaoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedCozinhaRoute: typeof AuthenticatedCozinhaRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
@@ -339,6 +359,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCaixaRoute: AuthenticatedCaixaRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
+  AuthenticatedComposicaoRoute: AuthenticatedComposicaoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedCozinhaRoute: AuthenticatedCozinhaRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
