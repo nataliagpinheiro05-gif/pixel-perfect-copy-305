@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Conteúdo */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 h-14 border-b border-border bg-background/80 backdrop-blur flex items-center gap-2 px-4 md:px-6">
+        <header className="sticky top-0 z-30 h-16 border-b border-border/70 bg-background/75 backdrop-blur-xl flex items-center gap-2 px-4 md:px-6">
           {/* Mobile menu trigger */}
           <Sheet>
             <SheetTrigger asChild>
@@ -150,12 +150,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
-              <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border">
-                <div className="size-9 rounded-lg bg-gold text-gold-foreground flex items-center justify-center">
+            <SheetContent side="left" className="w-72 p-0 text-sidebar-foreground border-sidebar-border bg-[linear-gradient(180deg,var(--sidebar)_0%,oklch(0.18_0.03_152)_100%)]">
+              <div className="px-5 py-5 flex items-center gap-3 border-b border-sidebar-border/70">
+                <div className="size-10 rounded-xl bg-gradient-to-br from-gold to-[oklch(0.66_0.13_75)] text-gold-foreground flex items-center justify-center shadow-md shadow-black/20">
                   <Leaf className="size-5" />
                 </div>
-                <div className="font-heading font-bold">FitLounge</div>
+                <div className="font-heading font-bold tracking-tight">FitLounge</div>
               </div>
               <nav className="p-3 space-y-1">
                 {visibleNav.map((item) => {
@@ -172,7 +172,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex-1 flex items-center gap-2 h-9 px-3 rounded-md bg-muted/60 hover:bg-muted text-muted-foreground text-sm border border-border max-w-xl"
+            className="flex-1 flex items-center gap-2 h-10 px-3.5 rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground text-sm border border-border/70 hover:border-border max-w-xl transition-colors"
           >
             <Search className="size-4" />
             <span className="hidden sm:inline">Buscar clientes, pedidos, produtos...</span>
@@ -183,7 +183,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <QuickActions />
         </header>
 
-        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 max-w-[1400px] w-full mx-auto">
+        <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8 max-w-[1440px] w-full mx-auto bg-app-radial">
           {children}
         </main>
 
