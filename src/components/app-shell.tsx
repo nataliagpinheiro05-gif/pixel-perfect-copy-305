@@ -243,7 +243,7 @@ function QuickActions() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" className="h-9 gap-1.5 bg-gold text-gold-foreground hover:bg-gold/90">
+        <Button size="sm" className="h-10 px-4 gap-1.5 bg-gradient-to-br from-gold to-[oklch(0.66_0.13_75)] text-gold-foreground hover:brightness-105 shadow-sm shadow-black/10 font-semibold">
           <Plus className="size-4" />
           <span className="hidden sm:inline">Novo</span>
         </Button>
