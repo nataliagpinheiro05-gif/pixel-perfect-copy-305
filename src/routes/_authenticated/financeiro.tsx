@@ -219,7 +219,7 @@ function SaidaDialog({ onClose }: { onClose: () => void }) {
           <div className="sm:col-span-2"><Label>Descrição *</Label><Input value={f.descricao} onChange={e => setF({ ...f, descricao: e.target.value })} /></div>
           <div><Label>Categoria</Label><Select value={f.categoria} onValueChange={v => setF({ ...f, categoria: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{CATEGORIAS_SAIDA.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
           <div><Label>Valor *</Label><Input type="number" step="0.01" value={f.valor} onChange={e => setF({ ...f, valor: Number(e.target.value) })} /></div>
-          <div><Label>Forma de pagamento</Label><Select value={f.forma_pagamento} onValueChange={v => setF({ ...f, forma_pagamento: v as any })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["pix","dinheiro","debito","credito"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
+          <div><Label>Forma de pagamento</Label><Select value={f.forma_pagamento} onValueChange={v => setF({ ...f, forma_pagamento: v as any })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{formas.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
           <div><Label>Data</Label><Input type="date" value={f.data} onChange={e => setF({ ...f, data: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Observações</Label><Textarea value={f.observacoes} onChange={e => setF({ ...f, observacoes: e.target.value })} /></div>
         </div>
