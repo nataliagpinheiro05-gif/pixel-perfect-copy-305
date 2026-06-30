@@ -348,7 +348,7 @@ function AdicionarProdutoDialog({ pedidoId, onClose, onAdded }: { pedidoId: stri
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Adicionar produto</DialogTitle>
-          <DialogDescription>Escolha um produto. Itens de preparo vão automaticamente para a cozinha.</DialogDescription>
+          <DialogDescription>Escolha um produto. Você pode decidir se ele vai para a cozinha na próxima etapa.</DialogDescription>
         </DialogHeader>
         <div className="flex gap-2">
           <div className="relative flex-1">
