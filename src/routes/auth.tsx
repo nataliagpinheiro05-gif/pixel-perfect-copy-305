@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Leaf } from "lucide-react";
+import { loginSchema, signupSchema, formatZodError } from "@/lib/validations";
+import { handleError } from "@/lib/errors";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -28,6 +30,10 @@ function AuthPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = mode === "login"
+      ? loginSchema.safeParse({ email, password })
+      : signupSchema.safeParse({ email, password, nome });
+    if (!parsed.success) { toast.error(formatZodError(parsed.error)); return; }
     setLoading(true);
     try {
       if (mode === "login") {
@@ -48,8 +54,8 @@ function AuthPage() {
         toast.success("Conta criada. Verifique seu e-mail se necessário.");
         navigate({ to: "/" });
       }
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao autenticar");
+    } catch (err) {
+      handleError(err, "Erro ao autenticar");
     } finally {
       setLoading(false);
     }
