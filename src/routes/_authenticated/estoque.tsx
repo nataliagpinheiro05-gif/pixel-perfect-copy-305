@@ -162,7 +162,7 @@ function EstoquePage() {
                   <td className="text-right">
                     <span className={ok ? "" : "text-amber-600 font-semibold"}>{i.quantidade_atual} {i.unidade_medida}</span>
                   </td>
-                  <td className="text-right text-muted-foreground">{i.estoque_minimo}</td>
+                  <td className="text-right text-muted-foreground">{i.estoque_minimo > 0 ? `${i.estoque_minimo} ${i.unidade_medida}` : "—"}</td>
                   <td className="text-right">{brl(i.custo_unitario)}</td>
                   <td className={venceu ? "text-red-600 font-semibold" : vence ? "text-amber-600" : ""}>
                     {i.validade ? new Date(i.validade).toLocaleDateString("pt-BR") : "—"}
