@@ -148,7 +148,7 @@ function EstoquePage() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-xs uppercase text-muted-foreground border-b border-border">
-            <tr><th className="text-left py-2">Item</th><th className="text-left">Categoria</th><th className="text-right">Qtd</th><th className="text-right">Mín</th><th className="text-right">Custo un.</th><th className="text-left">Validade</th><th></th></tr>
+            <tr><th className="text-left py-2">Item</th><th className="text-left">Categoria</th><th className="text-right">Qtd atual</th><th className="text-right">Mínimo</th><th className="text-right">Custo un.</th><th className="text-left">Validade</th><th></th></tr>
           </thead>
           <tbody>
             {filtrados.map((i) => {
