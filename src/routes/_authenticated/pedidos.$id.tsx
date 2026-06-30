@@ -15,6 +15,7 @@ import {
 import { brl } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useConfigLoja } from "@/hooks/use-config-loja";
 import {
   ArrowLeft, Plus, Trash2, X, Search, Lock, Receipt, Clock, ChefHat,
   Banknote, Smartphone, CreditCard, Wallet, CheckCircle2,
