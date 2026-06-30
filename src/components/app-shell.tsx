@@ -103,13 +103,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.to}
                 to={item.to as any}
                 className={
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors " +
+                  "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all " +
                   (active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground")
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner shadow-black/20 ring-1 ring-gold/30"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:translate-x-0.5")
                 }
               >
-                <Icon className="size-4" />
+                <Icon className={"size-4 transition-colors " + (active ? "text-gold" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground")} />
                 {item.label}
               </Link>
             );
