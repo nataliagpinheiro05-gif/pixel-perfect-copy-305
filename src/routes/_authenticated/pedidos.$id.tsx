@@ -561,7 +561,7 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
   }
 
   function adicionar() {
-    setLinhas(arr => [...arr, { id: crypto.randomUUID(), forma: "dinheiro", valor: "", recebido: "", obs: "" }]);
+    setLinhas(arr => [...arr, { id: crypto.randomUUID(), forma: formaPadrao, valor: "", recebido: "", obs: "" }]);
   }
 
   function remover(id: string) {
