@@ -49,7 +49,7 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
       ]);
       if (cancelled) return;
       const out: Resultado[] = [];
-      (cli.data ?? []).forEach((c: any) => out.push({ id: c.id, label: c.nome, hint: c.telefone, to: `/clientes/${c.id}`, group: "Clientes", icon: Users }));
+      (cli.data ?? []).forEach((c: any) => out.push({ id: c.id, label: c.nome, hint: c.telefone, to: `/clientes?q=${encodeURIComponent(c.nome)}`, group: "Clientes", icon: Users }));
       (ped.data ?? []).forEach((p: any) => out.push({ id: p.id, label: `Pedido #${p.numero}`, to: `/pedidos/${p.id}`, group: "Pedidos", icon: Receipt }));
       (prod.data ?? []).forEach((p: any) => out.push({ id: p.id, label: p.nome, to: `/produtos`, group: "Produtos", icon: Package }));
       (est.data ?? []).forEach((p: any) => out.push({ id: p.id, label: p.nome, to: `/estoque`, group: "Estoque", icon: Boxes }));
