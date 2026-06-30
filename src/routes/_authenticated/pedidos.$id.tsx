@@ -522,9 +522,15 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
   pedidoId: string; numero: number; subtotal: number; descontoAtual: number;
   onClose: () => void; onClosed: () => void;
 }) {
+  const { formasAtivas } = useConfigLoja();
+  const formasDisponiveis = useMemo(
+    () => FORMAS.filter(f => formasAtivas.length === 0 || formasAtivas.includes(f.value)),
+    [formasAtivas]
+  );
+  const formaPadrao: Forma = (formasDisponiveis[0]?.value ?? "pix");
   const [desconto, setDesconto] = useState<string>(String(descontoAtual || 0));
   const [linhas, setLinhas] = useState<Linha[]>([
-    { id: crypto.randomUUID(), forma: "pix", valor: "", recebido: "", obs: "" },
+    { id: crypto.randomUUID(), forma: formaPadrao, valor: "", recebido: "", obs: "" },
   ]);
   const [saving, setSaving] = useState(false);
 
