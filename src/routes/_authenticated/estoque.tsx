@@ -180,7 +180,7 @@ function EstoquePage() {
         </table>
       </div>
 
-      {(novo || editar) && <ItemForm item={editar} onClose={() => { setNovo(false); setEditar(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} />}
+      {(novo || editar) && <ItemForm item={editar} onClose={() => { setNovo(false); setEditar(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} onMovimentar={(it) => { setEditar(null); setNovo(false); setMovItem(it); }} />}
       {movItem && <MovDialog item={movItem} onClose={() => { setMovItem(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} />}
       {histItem && <HistDialog item={histItem} onClose={() => setHistItem(null)} />}
     </>
