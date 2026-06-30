@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
 import { Users, Plus, Search, MessageCircle, Pencil } from "lucide-react";
+import { clienteSchema, formatZodError } from "@/lib/validations";
+import { handleError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => ({ meta: [{ title: "Clientes — FitLounge" }] }),
@@ -99,32 +101,40 @@ function ClienteFormDialog({ cliente, onClose }: { cliente: Cliente | null; onCl
   const [saving, setSaving] = useState(false);
 
   async function salvar() {
-    if (!nome.trim()) { toast.error("Informe o nome"); return; }
+    const parsed = clienteSchema.safeParse({
+      nome, telefone, data_nascimento: nasc, por_quem_veio: porQuem,
+      quem_indicou: quemIndicou, observacoes: obs,
+    });
+    if (!parsed.success) { toast.error(formatZodError(parsed.error)); return; }
+    const v = parsed.data;
     setSaving(true);
-    const payload = {
-      _nome: nome.trim(),
-      _telefone: telefone.replace(/\D/g, "") || null as any,
-      _data_nascimento: nasc || null as any,
-      _por_quem_veio: porQuem || null as any,
-      _quem_indicou: quemIndicou || null as any,
-      _observacoes: obs || null as any,
-    };
-    if (cliente) {
-      const { error } = await supabase.from("clientes").update({
-        nome: nome.trim(), telefone: telefone.replace(/\D/g, "") || null,
-        data_nascimento: nasc || null, por_quem_veio: porQuem || null,
-        quem_indicou: quemIndicou || null, observacoes: obs || null,
-      }).eq("id", cliente.id);
+    try {
+      if (cliente) {
+        const { error } = await supabase.from("clientes").update({
+          nome: v.nome, telefone: v.telefone || null,
+          data_nascimento: v.data_nascimento || null, por_quem_veio: v.por_quem_veio || null,
+          quem_indicou: v.quem_indicou || null, observacoes: v.observacoes || null,
+        }).eq("id", cliente.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.rpc("upsert_cliente", {
+          _nome: v.nome,
+          _telefone: (v.telefone || null) as any,
+          _data_nascimento: (v.data_nascimento || null) as any,
+          _por_quem_veio: (v.por_quem_veio || null) as any,
+          _quem_indicou: (v.quem_indicou || null) as any,
+          _observacoes: (v.observacoes || null) as any,
+        });
+        if (error) throw error;
+      }
+      toast.success("Cliente salvo");
+      qc.invalidateQueries({ queryKey: ["clientes"] });
+      onClose();
+    } catch (err) {
+      handleError(err, "Não foi possível salvar o cliente");
+    } finally {
       setSaving(false);
-      if (error) { toast.error(error.message); return; }
-    } else {
-      const { error } = await supabase.rpc("upsert_cliente", payload);
-      setSaving(false);
-      if (error) { toast.error(error.message); return; }
     }
-    toast.success("Cliente salvo");
-    qc.invalidateQueries({ queryKey: ["clientes"] });
-    onClose();
   }
 
   return (
