@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfigLoja } from "@/hooks/use-config-loja";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
-import { Package, Plus, Pencil, ArrowDown, ArrowUp, AlertTriangle, History } from "lucide-react";
+import { Package, Plus, Pencil, ArrowDown, ArrowUp, AlertTriangle, History, Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/estoque")({
   head: () => ({ meta: [{ title: "Estoque — FitLounge" }] }),
@@ -30,13 +31,20 @@ type Item = {
 const UNIDADES = ["unidade","pote","sachê","dose","caixa","pacote","g","kg","l","ml"];
 const CATEGORIAS = ["Insumos Herbalife","Embalagens","Ingredientes","Kits Meu Slim","Outros"];
 
+type Filtro = "todos" | "baixo" | "zerado" | "vencendo" | "vencido" | "ativos" | "inativos";
+
 function EstoquePage() {
   const { perfil } = useAuth();
   const qc = useQueryClient();
+  const { diasAlertaVencimento } = useConfigLoja();
   const [editar, setEditar] = useState<Item | null>(null);
   const [novo, setNovo] = useState(false);
   const [movItem, setMovItem] = useState<Item | null>(null);
   const [histItem, setHistItem] = useState<Item | null>(null);
+
+  const [busca, setBusca] = useState("");
+  const [categoria, setCategoria] = useState<string>("todas");
+  const [filtro, setFiltro] = useState<Filtro>("todos");
 
   const { data: itens = [] } = useQuery({
     queryKey: ["estoque"],
@@ -46,8 +54,38 @@ function EstoquePage() {
     },
   });
 
-  const baixo = itens.filter(i => i.estoque_minimo > 0 && i.quantidade_atual <= i.estoque_minimo);
-  const vencendo = itens.filter(i => i.validade && (new Date(i.validade).getTime() - Date.now()) < 7 * 24 * 3600 * 1000);
+  const limiteVenc = diasAlertaVencimento * 24 * 3600 * 1000;
+  const agora = Date.now();
+
+  const isBaixo = (i: Item) => i.estoque_minimo > 0 && Number(i.quantidade_atual) <= Number(i.estoque_minimo) && Number(i.quantidade_atual) > 0;
+  const isZerado = (i: Item) => Number(i.quantidade_atual) <= 0;
+  const isVencendo = (i: Item) => {
+    if (!i.validade) return false;
+    const diff = new Date(i.validade).getTime() - agora;
+    return diff >= 0 && diff <= limiteVenc;
+  };
+  const isVencido = (i: Item) => i.validade ? new Date(i.validade).getTime() < agora : false;
+
+  const baixo = itens.filter(isBaixo);
+  const vencendo = itens.filter(isVencendo);
+  const vencido = itens.filter(isVencido);
+
+  const filtrados = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    return itens.filter((i) => {
+      if (q && !i.nome.toLowerCase().includes(q)) return false;
+      if (categoria !== "todas" && (i.categoria ?? "") !== categoria) return false;
+      switch (filtro) {
+        case "baixo": return isBaixo(i);
+        case "zerado": return isZerado(i);
+        case "vencendo": return isVencendo(i);
+        case "vencido": return isVencido(i);
+        case "ativos": return i.ativo;
+        case "inativos": return !i.ativo;
+        default: return true;
+      }
+    });
+  }, [itens, busca, categoria, filtro, diasAlertaVencimento]);
 
   return (
     <>
@@ -61,15 +99,51 @@ function EstoquePage() {
         </Button>
       </div>
 
-      {(baixo.length > 0 || vencendo.length > 0) && (
+      {(baixo.length > 0 || vencendo.length > 0 || vencido.length > 0) && (
         <Card className="p-3 mb-4 border-amber-500/40 bg-amber-500/5">
           <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
             <AlertTriangle className="size-4" /><span className="font-semibold">Alertas</span>
           </div>
           {baixo.length > 0 && <div className="text-sm">{baixo.length} item(ns) abaixo do mínimo</div>}
-          {vencendo.length > 0 && <div className="text-sm">{vencendo.length} item(ns) vencendo em até 7 dias</div>}
+          {vencendo.length > 0 && <div className="text-sm">{vencendo.length} item(ns) vencendo em até {diasAlertaVencimento} dias</div>}
+          {vencido.length > 0 && <div className="text-sm text-red-600">{vencido.length} item(ns) vencido(s)</div>}
         </Card>
       )}
+
+      <Card className="p-3 mb-4 flex flex-wrap gap-2 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <Label className="text-xs">Buscar</Label>
+          <div className="relative">
+            <Search className="size-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nome do item..." className="pl-8" />
+          </div>
+        </div>
+        <div className="min-w-[160px]">
+          <Label className="text-xs">Categoria</Label>
+          <Select value={categoria} onValueChange={setCategoria}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              {CATEGORIAS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="min-w-[160px]">
+          <Label className="text-xs">Filtro</Label>
+          <Select value={filtro} onValueChange={(v) => setFiltro(v as Filtro)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="baixo">Estoque baixo</SelectItem>
+              <SelectItem value="zerado">Estoque zerado</SelectItem>
+              <SelectItem value="vencendo">Vencendo (≤ {diasAlertaVencimento} dias)</SelectItem>
+              <SelectItem value="vencido">Vencido</SelectItem>
+              <SelectItem value="ativos">Ativos</SelectItem>
+              <SelectItem value="inativos">Inativos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </Card>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -77,18 +151,22 @@ function EstoquePage() {
             <tr><th className="text-left py-2">Item</th><th className="text-left">Categoria</th><th className="text-right">Qtd</th><th className="text-right">Mín</th><th className="text-right">Custo un.</th><th className="text-left">Validade</th><th></th></tr>
           </thead>
           <tbody>
-            {itens.map((i) => {
+            {filtrados.map((i) => {
               const ok = i.estoque_minimo === 0 || i.quantidade_atual > i.estoque_minimo;
+              const vence = isVencendo(i);
+              const venceu = isVencido(i);
               return (
-                <tr key={i.id} className="border-b border-border hover:bg-muted/40">
-                  <td className="py-2 font-medium">{i.nome}</td>
+                <tr key={i.id} className={"border-b border-border hover:bg-muted/40 " + (i.ativo ? "" : "opacity-60")}>
+                  <td className="py-2 font-medium">{i.nome} {!i.ativo && <Badge variant="outline" className="ml-1 text-xs">inativo</Badge>}</td>
                   <td className="text-muted-foreground">{i.categoria ?? "—"}</td>
                   <td className="text-right">
                     <span className={ok ? "" : "text-amber-600 font-semibold"}>{i.quantidade_atual} {i.unidade_medida}</span>
                   </td>
                   <td className="text-right text-muted-foreground">{i.estoque_minimo}</td>
                   <td className="text-right">{brl(i.custo_unitario)}</td>
-                  <td>{i.validade ? new Date(i.validade).toLocaleDateString("pt-BR") : "—"}</td>
+                  <td className={venceu ? "text-red-600 font-semibold" : vence ? "text-amber-600" : ""}>
+                    {i.validade ? new Date(i.validade).toLocaleDateString("pt-BR") : "—"}
+                  </td>
                   <td className="text-right whitespace-nowrap">
                     <Button variant="ghost" size="icon" className="size-8" onClick={() => setMovItem(i)}><ArrowUp className="size-4 text-green-600" /></Button>
                     <Button variant="ghost" size="icon" className="size-8" onClick={() => setHistItem(i)}><History className="size-4" /></Button>
@@ -97,7 +175,7 @@ function EstoquePage() {
                 </tr>
               );
             })}
-            {itens.length === 0 && <tr><td colSpan={7} className="text-center py-12 text-muted-foreground">Nenhum item cadastrado.</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={7} className="text-center py-12 text-muted-foreground">Nenhum item encontrado.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -110,9 +188,10 @@ function EstoquePage() {
 }
 
 function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void }) {
+  const isNew = !item;
   const [f, setF] = useState({
     nome: item?.nome ?? "", categoria: item?.categoria ?? "Insumos Herbalife",
-    quantidade_atual: item?.quantidade_atual ?? 0, unidade_medida: item?.unidade_medida ?? "unidade",
+    quantidade_inicial: 0, unidade_medida: item?.unidade_medida ?? "unidade",
     estoque_minimo: item?.estoque_minimo ?? 0, custo_unitario: item?.custo_unitario ?? 0,
     fornecedor: item?.fornecedor ?? "", validade: item?.validade ?? "", ativo: item?.ativo ?? true,
   });
@@ -121,14 +200,39 @@ function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void })
   async function salvar() {
     if (!f.nome.trim()) { toast.error("Nome obrigatório"); return; }
     setSaving(true);
-    const payload = { ...f, validade: f.validade || null, fornecedor: f.fornecedor || null };
-    const op = item
-      ? supabase.from("estoque_itens").update(payload).eq("id", item.id)
-      : supabase.from("estoque_itens").insert(payload);
-    const { error } = await op;
+
+    if (item) {
+      // edição: NÃO atualiza quantidade
+      const payload = {
+        nome: f.nome, categoria: f.categoria, unidade_medida: f.unidade_medida,
+        estoque_minimo: f.estoque_minimo, custo_unitario: f.custo_unitario,
+        fornecedor: f.fornecedor || null, validade: f.validade || null, ativo: f.ativo,
+      };
+      const { error } = await supabase.from("estoque_itens").update(payload).eq("id", item.id);
+      setSaving(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Item atualizado"); onClose();
+      return;
+    }
+
+    // novo item: cria com quantidade 0 e registra entrada inicial via RPC
+    const { data: created, error: e1 } = await supabase.from("estoque_itens").insert({
+      nome: f.nome, categoria: f.categoria, unidade_medida: f.unidade_medida,
+      estoque_minimo: f.estoque_minimo, custo_unitario: f.custo_unitario,
+      fornecedor: f.fornecedor || null, validade: f.validade || null, ativo: f.ativo,
+      quantidade_atual: 0,
+    }).select("id").single();
+    if (e1 || !created) { setSaving(false); toast.error(e1?.message ?? "Erro ao criar item"); return; }
+
+    if (f.quantidade_inicial > 0) {
+      const { error: e2 } = await supabase.rpc("registrar_entrada_estoque", {
+        _item_id: created.id, _quantidade: f.quantidade_inicial,
+        _observacoes: "Entrada inicial (cadastro do item)",
+      });
+      if (e2) { setSaving(false); toast.error("Item criado mas falha ao registrar entrada: " + e2.message); return; }
+    }
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Item salvo"); onClose();
+    toast.success("Item cadastrado"); onClose();
   }
 
   return (
@@ -149,11 +253,27 @@ function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void })
               <SelectContent>{UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>Quantidade atual</Label><Input type="number" step="0.01" value={f.quantidade_atual} onChange={e => setF({ ...f, quantidade_atual: Number(e.target.value) })} /></div>
+          {isNew ? (
+            <div>
+              <Label>Quantidade inicial</Label>
+              <Input type="number" step="0.01" value={f.quantidade_inicial} onChange={e => setF({ ...f, quantidade_inicial: Number(e.target.value) })} />
+              <p className="text-xs text-muted-foreground mt-1">Registrada como entrada no histórico.</p>
+            </div>
+          ) : (
+            <div>
+              <Label>Quantidade atual</Label>
+              <Input value={item!.quantidade_atual} disabled />
+              <p className="text-xs text-muted-foreground mt-1">Use Movimentar para alterar.</p>
+            </div>
+          )}
           <div><Label>Estoque mínimo</Label><Input type="number" step="0.01" value={f.estoque_minimo} onChange={e => setF({ ...f, estoque_minimo: Number(e.target.value) })} /></div>
           <div><Label>Custo unitário</Label><Input type="number" step="0.01" value={f.custo_unitario} onChange={e => setF({ ...f, custo_unitario: Number(e.target.value) })} /></div>
           <div><Label>Validade</Label><Input type="date" value={f.validade ?? ""} onChange={e => setF({ ...f, validade: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Fornecedor</Label><Input value={f.fornecedor ?? ""} onChange={e => setF({ ...f, fornecedor: e.target.value })} /></div>
+          <div className="sm:col-span-2 flex items-center gap-2">
+            <input id="ativo" type="checkbox" checked={f.ativo} onChange={e => setF({ ...f, ativo: e.target.checked })} />
+            <Label htmlFor="ativo">Item ativo</Label>
+          </div>
         </div>
         <DialogFooter><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button onClick={salvar} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button></DialogFooter>
       </DialogContent>

@@ -15,6 +15,7 @@ import {
 import { brl } from "@/lib/format";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useConfigLoja } from "@/hooks/use-config-loja";
 import {
   ArrowLeft, Plus, Trash2, X, Search, Lock, Receipt, Clock, ChefHat,
   Banknote, Smartphone, CreditCard, Wallet, CheckCircle2,
@@ -521,9 +522,15 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
   pedidoId: string; numero: number; subtotal: number; descontoAtual: number;
   onClose: () => void; onClosed: () => void;
 }) {
+  const { formasAtivas } = useConfigLoja();
+  const formasDisponiveis = useMemo(
+    () => FORMAS.filter(f => formasAtivas.length === 0 || formasAtivas.includes(f.value)),
+    [formasAtivas]
+  );
+  const formaPadrao: Forma = (formasDisponiveis[0]?.value ?? "pix");
   const [desconto, setDesconto] = useState<string>(String(descontoAtual || 0));
   const [linhas, setLinhas] = useState<Linha[]>([
-    { id: crypto.randomUUID(), forma: "pix", valor: "", recebido: "", obs: "" },
+    { id: crypto.randomUUID(), forma: formaPadrao, valor: "", recebido: "", obs: "" },
   ]);
   const [saving, setSaving] = useState(false);
 
@@ -554,7 +561,7 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
   }
 
   function adicionar() {
-    setLinhas(arr => [...arr, { id: crypto.randomUUID(), forma: "dinheiro", valor: "", recebido: "", obs: "" }]);
+    setLinhas(arr => [...arr, { id: crypto.randomUUID(), forma: formaPadrao, valor: "", recebido: "", obs: "" }]);
   }
 
   function remover(id: string) {
@@ -646,7 +653,7 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
               {linhas.map((l, idx) => (
                 <li key={l.id} className="rounded-lg border border-border p-2 space-y-2">
                   <div className="grid grid-cols-4 gap-1.5">
-                    {FORMAS.map((f) => {
+                    {formasDisponiveis.map((f) => {
                       const Icon = f.icon; const ativo = l.forma === f.value;
                       return (
                         <button key={f.value} onClick={() => setLinhas(arr => arr.map((x, i) => i === idx ? { ...x, forma: f.value } : x))}

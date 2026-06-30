@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfigLoja } from "@/hooks/use-config-loja";
 import { Wallet, Plus, TrendingUp, TrendingDown, Ban, Undo2 } from "lucide-react";
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, subDays, startOfYear } from "date-fns";
 
@@ -193,9 +194,11 @@ function FinanceiroPage() {
 
 function SaidaDialog({ onClose }: { onClose: () => void }) {
   const { perfil } = useAuth();
+  const { formasAtivas } = useConfigLoja();
+  const formas = formasAtivas.length > 0 ? formasAtivas : (["pix","dinheiro","debito","credito"] as const);
   const [f, setF] = useState({
     descricao: "", categoria: CATEGORIAS_SAIDA[0], valor: 0,
-    forma_pagamento: "pix" as any, data: new Date().toISOString().slice(0, 10), observacoes: "",
+    forma_pagamento: formas[0] as any, data: new Date().toISOString().slice(0, 10), observacoes: "",
   });
   const [saving, setSaving] = useState(false);
   async function salvar() {
@@ -216,7 +219,7 @@ function SaidaDialog({ onClose }: { onClose: () => void }) {
           <div className="sm:col-span-2"><Label>Descrição *</Label><Input value={f.descricao} onChange={e => setF({ ...f, descricao: e.target.value })} /></div>
           <div><Label>Categoria</Label><Select value={f.categoria} onValueChange={v => setF({ ...f, categoria: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{CATEGORIAS_SAIDA.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
           <div><Label>Valor *</Label><Input type="number" step="0.01" value={f.valor} onChange={e => setF({ ...f, valor: Number(e.target.value) })} /></div>
-          <div><Label>Forma de pagamento</Label><Select value={f.forma_pagamento} onValueChange={v => setF({ ...f, forma_pagamento: v as any })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["pix","dinheiro","debito","credito"].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
+          <div><Label>Forma de pagamento</Label><Select value={f.forma_pagamento} onValueChange={v => setF({ ...f, forma_pagamento: v as any })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{formas.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select></div>
           <div><Label>Data</Label><Input type="date" value={f.data} onChange={e => setF({ ...f, data: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Observações</Label><Textarea value={f.observacoes} onChange={e => setF({ ...f, observacoes: e.target.value })} /></div>
         </div>
