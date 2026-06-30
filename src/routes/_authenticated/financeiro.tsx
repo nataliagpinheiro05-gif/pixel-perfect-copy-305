@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfigLoja } from "@/hooks/use-config-loja";
 import { Wallet, Plus, TrendingUp, TrendingDown, Ban, Undo2 } from "lucide-react";
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, subDays, startOfYear } from "date-fns";
 
