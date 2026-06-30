@@ -84,14 +84,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar desktop */}
-      <aside className="hidden md:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border">
-          <div className="size-9 rounded-lg bg-gold text-gold-foreground flex items-center justify-center">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col text-sidebar-foreground border-r border-sidebar-border bg-[linear-gradient(180deg,var(--sidebar)_0%,oklch(0.18_0.03_152)_100%)]">
+        <div className="px-5 py-5 flex items-center gap-3 border-b border-sidebar-border/70">
+          <div className="size-10 rounded-xl bg-gradient-to-br from-gold to-[oklch(0.66_0.13_75)] text-gold-foreground flex items-center justify-center shadow-md shadow-black/20">
             <Leaf className="size-5" />
           </div>
           <div className="leading-tight">
-            <div className="font-heading font-bold">FitLounge</div>
-            <div className="text-[11px] text-sidebar-foreground/60">Gestão</div>
+            <div className="font-heading font-bold tracking-tight">FitLounge</div>
+            <div className="text-[11px] uppercase tracking-[0.14em] text-sidebar-foreground/50">Gestão</div>
           </div>
         </div>
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
