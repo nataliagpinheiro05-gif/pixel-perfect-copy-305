@@ -62,8 +62,8 @@
 :root {
   --radius: 0.75rem;
 
-  /* Light mode (interno: pouco usado, mas definido) */
-  --background: oklch(0.985 0.005 130);
+  /* Fundo levemente off-white com toque verde — sensação premium */
+  --background: oklch(0.98 0.008 140);
   --foreground: oklch(0.18 0.02 150);
 
   --card: oklch(1 0 0);
