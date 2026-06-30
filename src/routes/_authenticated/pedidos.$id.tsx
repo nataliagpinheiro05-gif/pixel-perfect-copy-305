@@ -653,7 +653,7 @@ function FecharContaDialog({ pedidoId, numero, subtotal, descontoAtual, onClose,
               {linhas.map((l, idx) => (
                 <li key={l.id} className="rounded-lg border border-border p-2 space-y-2">
                   <div className="grid grid-cols-4 gap-1.5">
-                    {FORMAS.map((f) => {
+                    {formasDisponiveis.map((f) => {
                       const Icon = f.icon; const ativo = l.forma === f.value;
                       return (
                         <button key={f.value} onClick={() => setLinhas(arr => arr.map((x, i) => i === idx ? { ...x, forma: f.value } : x))}
