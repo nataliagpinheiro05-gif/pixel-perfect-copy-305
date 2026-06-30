@@ -27,7 +27,10 @@ type Cliente = {
 };
 
 function ClientesPage() {
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("q") ?? "";
+  });
   const [editar, setEditar] = useState<Cliente | null>(null);
   const [novo, setNovo] = useState(false);
   const [detalhe, setDetalhe] = useState<Cliente | null>(null);
