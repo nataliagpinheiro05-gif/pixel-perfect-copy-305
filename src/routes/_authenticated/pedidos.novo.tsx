@@ -213,7 +213,6 @@ function NovoClienteDialog({ telefoneInicial, nomeInicial, onClose, onSaved }: {
   const [nome, setNome] = useState(nomeInicial);
   const [telefone, setTelefone] = useState(telefoneInicial);
   const [dataNasc, setDataNasc] = useState("");
-  const [porQuem, setPorQuem] = useState("");
   const [quemIndicou, setQuemIndicou] = useState("");
   const [obs, setObs] = useState("");
   const [saving, setSaving] = useState(false);
@@ -225,7 +224,7 @@ function NovoClienteDialog({ telefoneInicial, nomeInicial, onClose, onSaved }: {
       _nome: nome.trim(),
       _telefone: (telefone.replace(/\D/g, "") || null) as any,
       _data_nascimento: (dataNasc || null) as any,
-      _por_quem_veio: (porQuem || null) as any,
+      _por_quem_veio: null as any,
       _quem_indicou: (quemIndicou || null) as any,
       _observacoes: (obs || null) as any,
     });
@@ -242,10 +241,9 @@ function NovoClienteDialog({ telefoneInicial, nomeInicial, onClose, onSaved }: {
         <DialogHeader><DialogTitle>Novo cliente</DialogTitle></DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2"><Label>Nome *</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-          <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Só números" /></div>
+          <div><Label>Telefone / WhatsApp</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Só números" /></div>
           <div><Label>Data de nascimento</Label><Input type="date" value={dataNasc} onChange={(e) => setDataNasc(e.target.value)} /></div>
-          <div><Label>Por quem veio</Label><Input value={porQuem} onChange={(e) => setPorQuem(e.target.value)} /></div>
-          <div><Label>Quem indicou</Label><Input value={quemIndicou} onChange={(e) => setQuemIndicou(e.target.value)} /></div>
+          <div className="sm:col-span-2"><Label>Quem indicou</Label><Input value={quemIndicou} onChange={(e) => setQuemIndicou(e.target.value)} /></div>
           <div className="sm:col-span-2"><Label>Observações</Label><Textarea value={obs} onChange={(e) => setObs(e.target.value)} /></div>
         </div>
         <DialogFooter>

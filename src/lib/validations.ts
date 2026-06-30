@@ -19,7 +19,7 @@ export const clienteSchema = z.object({
     .transform((v) => (v ? onlyDigits(v) : ""))
     .refine((v) => !v || (v.length >= 10 && v.length <= 13), "Telefone inválido"),
   data_nascimento: z.string().optional().or(z.literal("")),
-  por_quem_veio: z.string().max(80).optional().or(z.literal("")),
+  
   quem_indicou: z.string().max(80).optional().or(z.literal("")),
   observacoes: z.string().max(1000).optional().or(z.literal("")),
 });
