@@ -1425,47 +1425,90 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      adicionar_item_comanda: {
-        Args: {
-          _adicionais?: Json
-          _observacoes?: string
-          _pedido_id: string
-          _produto_id: string
-          _quantidade?: number
-          _sabor?: string
-        }
-        Returns: {
-          adicionais: Json
-          cancelado_em: string | null
-          created_at: string
-          custo_unitario: number
-          entregue_em: string | null
-          envia_para_cozinha: boolean
-          enviado_cozinha_em: string | null
-          estoque_baixado: boolean
-          id: string
-          motivo_cancelamento: string | null
-          nome_produto: string
-          observacoes: string | null
-          observacoes_cozinha: string | null
-          pedido_id: string
-          preco_unitario: number
-          preparo_iniciado_em: string | null
-          produto_id: string | null
-          pronto_em: string | null
-          quantidade: number
-          rodada: number
-          sabor: string | null
-          status_preparo: string
-          subtotal: number
-        }
-        SetofOptions: {
-          from: "*"
-          to: "pedido_itens"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      adicionar_item_comanda:
+        | {
+            Args: {
+              _adicionais?: Json
+              _observacoes?: string
+              _pedido_id: string
+              _produto_id: string
+              _quantidade?: number
+              _sabor?: string
+            }
+            Returns: {
+              adicionais: Json
+              cancelado_em: string | null
+              created_at: string
+              custo_unitario: number
+              entregue_em: string | null
+              envia_para_cozinha: boolean
+              enviado_cozinha_em: string | null
+              estoque_baixado: boolean
+              id: string
+              motivo_cancelamento: string | null
+              nome_produto: string
+              observacoes: string | null
+              observacoes_cozinha: string | null
+              pedido_id: string
+              preco_unitario: number
+              preparo_iniciado_em: string | null
+              produto_id: string | null
+              pronto_em: string | null
+              quantidade: number
+              rodada: number
+              sabor: string | null
+              status_preparo: string
+              subtotal: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pedido_itens"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              _adicionais?: Json
+              _envia_para_cozinha?: boolean
+              _observacoes?: string
+              _pedido_id: string
+              _produto_id: string
+              _quantidade?: number
+              _sabor?: string
+            }
+            Returns: {
+              adicionais: Json
+              cancelado_em: string | null
+              created_at: string
+              custo_unitario: number
+              entregue_em: string | null
+              envia_para_cozinha: boolean
+              enviado_cozinha_em: string | null
+              estoque_baixado: boolean
+              id: string
+              motivo_cancelamento: string | null
+              nome_produto: string
+              observacoes: string | null
+              observacoes_cozinha: string | null
+              pedido_id: string
+              preco_unitario: number
+              preparo_iniciado_em: string | null
+              produto_id: string | null
+              pronto_em: string | null
+              quantidade: number
+              rodada: number
+              sabor: string | null
+              status_preparo: string
+              subtotal: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "pedido_itens"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       avancar_item_preparo: {
         Args: { _item_id: string; _novo_status: string }
         Returns: {
