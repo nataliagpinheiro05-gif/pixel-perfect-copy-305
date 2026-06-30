@@ -1127,7 +1127,9 @@ export type Database = {
           custo: number
           descricao: string | null
           envia_para_cozinha: boolean
+          estoque_item_id: string | null
           estoque_minimo: number
+          estoque_quantidade_por_unidade: number
           id: string
           lucro: number | null
           nome: string
@@ -1146,7 +1148,9 @@ export type Database = {
           custo?: number
           descricao?: string | null
           envia_para_cozinha?: boolean
+          estoque_item_id?: string | null
           estoque_minimo?: number
+          estoque_quantidade_por_unidade?: number
           id?: string
           lucro?: number | null
           nome: string
@@ -1165,7 +1169,9 @@ export type Database = {
           custo?: number
           descricao?: string | null
           envia_para_cozinha?: boolean
+          estoque_item_id?: string | null
           estoque_minimo?: number
+          estoque_quantidade_por_unidade?: number
           id?: string
           lucro?: number | null
           nome?: string
@@ -1181,6 +1187,20 @@ export type Database = {
             columns: ["categoria_id"]
             isOneToOne: false
             referencedRelation: "categorias_produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produtos_estoque_item_id_fkey"
+            columns: ["estoque_item_id"]
+            isOneToOne: false
+            referencedRelation: "estoque_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produtos_estoque_item_id_fkey"
+            columns: ["estoque_item_id"]
+            isOneToOne: false
+            referencedRelation: "vw_estoque_alertas"
             referencedColumns: ["id"]
           },
         ]
