@@ -299,6 +299,7 @@ function ItemForm({ item, onClose, onMovimentar }: { item: Item | null; onClose:
 }
 
 function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
+  const qc = useQueryClient();
   const [tipo, setTipo] = useState<"entrada" | "saida">("entrada");
   const [tipoMov, setTipoMov] = useState("compra");
   const [qtd, setQtd] = useState(0);
@@ -315,17 +316,20 @@ function MovDialog({ item, onClose }: { item: Item; onClose: () => void }) {
         _item_id: item.id, _quantidade: qtd,
         _observacoes: motivo || tipoMov,
       });
-      setSaving(false);
-      if (error) { toast.error(error.message); return; }
+      if (error) { setSaving(false); toast.error(error.message); return; }
     } else {
       const { error } = await supabase.rpc("registrar_saida_manual_estoque", {
         _item_id: item.id, _quantidade: qtd,
         _tipo_movimentacao: tipoMov, _motivo: motivo,
       });
-      setSaving(false);
-      if (error) { toast.error(error.message); return; }
+      if (error) { setSaving(false); toast.error(error.message); return; }
     }
-    toast.success("Movimentação registrada"); onClose();
+    // Força refetch imediato antes de fechar para a listagem refletir o novo saldo
+    await qc.invalidateQueries({ queryKey: ["estoque"], refetchType: "active" });
+    await qc.invalidateQueries({ queryKey: ["mov", item.id], refetchType: "active" });
+    setSaving(false);
+    toast.success("Movimentação registrada");
+    onClose();
   }
 
   return (
