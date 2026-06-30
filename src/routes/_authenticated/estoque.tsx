@@ -264,12 +264,27 @@ function ItemForm({ item, onClose, onMovimentar }: { item: Item | null; onClose:
           ) : (
             <div>
               <Label>Quantidade atual</Label>
-              <Input value={item!.quantidade_atual} disabled />
-              <p className="text-xs text-muted-foreground mt-1">Use Movimentar para alterar.</p>
+              <Input value={`${item!.quantidade_atual} ${item!.unidade_medida}`} disabled readOnly />
+              <p className="text-xs text-muted-foreground mt-1">Para alterar a quantidade, use Movimentar estoque.</p>
+              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => onMovimentar(item!)}>
+                <ArrowUp className="size-4 mr-1" /> Movimentar estoque
+              </Button>
             </div>
           )}
-          <div><Label>Estoque mínimo</Label><Input type="number" step="0.01" value={f.estoque_minimo} onChange={e => setF({ ...f, estoque_minimo: Number(e.target.value) })} /></div>
-          <div><Label>Custo unitário</Label><Input type="number" step="0.01" value={f.custo_unitario} onChange={e => setF({ ...f, custo_unitario: Number(e.target.value) })} /></div>
+          <div>
+            <Label>Estoque mínimo</Label>
+            <Input
+              type="number"
+              inputMode={UNIDADES_INTEIRAS.has(f.unidade_medida) ? "numeric" : "decimal"}
+              step={UNIDADES_INTEIRAS.has(f.unidade_medida) ? "1" : "0.01"}
+              min="0"
+              placeholder="Ex: 5"
+              value={f.estoque_minimo}
+              onChange={e => setF({ ...f, estoque_minimo: Number(e.target.value) })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Em {f.unidade_medida}.</p>
+          </div>
+          <div><Label>Custo unitário (R$)</Label><Input type="number" step="0.01" value={f.custo_unitario} onChange={e => setF({ ...f, custo_unitario: Number(e.target.value) })} /></div>
           <div><Label>Validade</Label><Input type="date" value={f.validade ?? ""} onChange={e => setF({ ...f, validade: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Fornecedor</Label><Input value={f.fornecedor ?? ""} onChange={e => setF({ ...f, fornecedor: e.target.value })} /></div>
           <div className="sm:col-span-2 flex items-center gap-2">
