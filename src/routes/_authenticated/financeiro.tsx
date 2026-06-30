@@ -193,9 +193,11 @@ function FinanceiroPage() {
 
 function SaidaDialog({ onClose }: { onClose: () => void }) {
   const { perfil } = useAuth();
+  const { formasAtivas } = useConfigLoja();
+  const formas = formasAtivas.length > 0 ? formasAtivas : (["pix","dinheiro","debito","credito"] as const);
   const [f, setF] = useState({
     descricao: "", categoria: CATEGORIAS_SAIDA[0], valor: 0,
-    forma_pagamento: "pix" as any, data: new Date().toISOString().slice(0, 10), observacoes: "",
+    forma_pagamento: formas[0] as any, data: new Date().toISOString().slice(0, 10), observacoes: "",
   });
   const [saving, setSaving] = useState(false);
   async function salvar() {
