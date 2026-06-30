@@ -148,7 +148,7 @@ function EstoquePage() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-xs uppercase text-muted-foreground border-b border-border">
-            <tr><th className="text-left py-2">Item</th><th className="text-left">Categoria</th><th className="text-right">Qtd</th><th className="text-right">Mín</th><th className="text-right">Custo un.</th><th className="text-left">Validade</th><th></th></tr>
+            <tr><th className="text-left py-2">Item</th><th className="text-left">Categoria</th><th className="text-right">Qtd atual</th><th className="text-right">Mínimo</th><th className="text-right">Custo un.</th><th className="text-left">Validade</th><th></th></tr>
           </thead>
           <tbody>
             {filtrados.map((i) => {
@@ -162,7 +162,7 @@ function EstoquePage() {
                   <td className="text-right">
                     <span className={ok ? "" : "text-amber-600 font-semibold"}>{i.quantidade_atual} {i.unidade_medida}</span>
                   </td>
-                  <td className="text-right text-muted-foreground">{i.estoque_minimo}</td>
+                  <td className="text-right text-muted-foreground">{i.estoque_minimo > 0 ? `${i.estoque_minimo} ${i.unidade_medida}` : "—"}</td>
                   <td className="text-right">{brl(i.custo_unitario)}</td>
                   <td className={venceu ? "text-red-600 font-semibold" : vence ? "text-amber-600" : ""}>
                     {i.validade ? new Date(i.validade).toLocaleDateString("pt-BR") : "—"}
@@ -180,14 +180,16 @@ function EstoquePage() {
         </table>
       </div>
 
-      {(novo || editar) && <ItemForm item={editar} onClose={() => { setNovo(false); setEditar(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} />}
+      {(novo || editar) && <ItemForm item={editar} onClose={() => { setNovo(false); setEditar(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} onMovimentar={(it) => { setEditar(null); setNovo(false); setMovItem(it); }} />}
       {movItem && <MovDialog item={movItem} onClose={() => { setMovItem(null); qc.invalidateQueries({ queryKey: ["estoque"] }); }} />}
       {histItem && <HistDialog item={histItem} onClose={() => setHistItem(null)} />}
     </>
   );
 }
 
-function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void }) {
+const UNIDADES_INTEIRAS = new Set(["unidade","caixa","pacote","pote","sachê"]);
+
+function ItemForm({ item, onClose, onMovimentar }: { item: Item | null; onClose: () => void; onMovimentar: (item: Item) => void }) {
   const isNew = !item;
   const [f, setF] = useState({
     nome: item?.nome ?? "", categoria: item?.categoria ?? "Insumos Herbalife",
@@ -262,12 +264,27 @@ function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void })
           ) : (
             <div>
               <Label>Quantidade atual</Label>
-              <Input value={item!.quantidade_atual} disabled />
-              <p className="text-xs text-muted-foreground mt-1">Use Movimentar para alterar.</p>
+              <Input value={`${item!.quantidade_atual} ${item!.unidade_medida}`} disabled readOnly />
+              <p className="text-xs text-muted-foreground mt-1">Para alterar a quantidade, use Movimentar estoque.</p>
+              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => onMovimentar(item!)}>
+                <ArrowUp className="size-4 mr-1" /> Movimentar estoque
+              </Button>
             </div>
           )}
-          <div><Label>Estoque mínimo</Label><Input type="number" step="0.01" value={f.estoque_minimo} onChange={e => setF({ ...f, estoque_minimo: Number(e.target.value) })} /></div>
-          <div><Label>Custo unitário</Label><Input type="number" step="0.01" value={f.custo_unitario} onChange={e => setF({ ...f, custo_unitario: Number(e.target.value) })} /></div>
+          <div>
+            <Label>Estoque mínimo</Label>
+            <Input
+              type="number"
+              inputMode={UNIDADES_INTEIRAS.has(f.unidade_medida) ? "numeric" : "decimal"}
+              step={UNIDADES_INTEIRAS.has(f.unidade_medida) ? "1" : "0.01"}
+              min="0"
+              placeholder="Ex: 5"
+              value={f.estoque_minimo}
+              onChange={e => setF({ ...f, estoque_minimo: Number(e.target.value) })}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Em {f.unidade_medida}.</p>
+          </div>
+          <div><Label>Custo unitário (R$)</Label><Input type="number" step="0.01" value={f.custo_unitario} onChange={e => setF({ ...f, custo_unitario: Number(e.target.value) })} /></div>
           <div><Label>Validade</Label><Input type="date" value={f.validade ?? ""} onChange={e => setF({ ...f, validade: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Fornecedor</Label><Input value={f.fornecedor ?? ""} onChange={e => setF({ ...f, fornecedor: e.target.value })} /></div>
           <div className="sm:col-span-2 flex items-center gap-2">
