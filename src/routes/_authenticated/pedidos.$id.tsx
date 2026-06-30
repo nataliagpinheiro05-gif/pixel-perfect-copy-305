@@ -348,7 +348,7 @@ function AdicionarProdutoDialog({ pedidoId, onClose, onAdded }: { pedidoId: stri
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Adicionar produto</DialogTitle>
-          <DialogDescription>Escolha um produto. Itens de preparo vão automaticamente para a cozinha.</DialogDescription>
+          <DialogDescription>Escolha um produto. Você pode decidir se ele vai para a cozinha na próxima etapa.</DialogDescription>
         </DialogHeader>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -391,6 +391,7 @@ function ItemConfigDialog({ produto, pedidoId, onBack, onClose, onAdded }: {
   const [adicSel, setAdicSel] = useState<Record<string, boolean>>({});
   const [qtd, setQtd] = useState(1);
   const [obs, setObs] = useState("");
+  const [enviaCozinha, setEnviaCozinha] = useState<boolean>(produto.envia_para_cozinha);
   const [saving, setSaving] = useState(false);
 
   const addList = adicionais.filter((a) => adicSel[a.id]).map((a) => ({ nome: a.nome, preco: Number(a.preco) }));
@@ -405,10 +406,11 @@ function ItemConfigDialog({ produto, pedidoId, onBack, onClose, onAdded }: {
       _sabor: (sabor || null) as any,
       _adicionais: addList as any,
       _observacoes: (obs || null) as any,
+      _envia_para_cozinha: enviaCozinha as any,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(produto.envia_para_cozinha ? "Item adicionado — enviado para cozinha" : "Item adicionado");
+    toast.success(enviaCozinha ? "Item adicionado e enviado para cozinha." : "Item adicionado à comanda sem enviar para cozinha.");
     onAdded();
     onClose();
   }
@@ -467,6 +469,26 @@ function ItemConfigDialog({ produto, pedidoId, onBack, onClose, onAdded }: {
         <div>
           <Label>Observações do item</Label>
           <Textarea value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Ex.: sem açúcar, gelado" />
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <Label>Enviar este item para a cozinha?</Label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setEnviaCozinha(true)}
+              className={"flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors " + (enviaCozinha ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted")}
+            >
+              <ChefHat className="size-4" /> Sim, enviar para cozinha
+            </button>
+            <button
+              type="button"
+              onClick={() => setEnviaCozinha(false)}
+              className={"px-3 py-2 text-sm rounded-lg border transition-colors " + (!enviaCozinha ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted")}
+            >
+              Não, apenas adicionar na comanda
+            </button>
+          </div>
         </div>
 
         <DialogFooter className="sm:justify-between gap-2 flex-wrap">

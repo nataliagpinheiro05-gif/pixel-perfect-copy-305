@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/clientes")({
 
 type Cliente = {
   id: string; nome: string; telefone: string | null; data_nascimento: string | null;
-  por_quem_veio: string | null; quem_indicou: string | null; observacoes: string | null; created_at: string;
+  quem_indicou: string | null; observacoes: string | null; created_at: string;
 };
 
 function ClientesPage() {
@@ -66,7 +66,7 @@ function ClientesPage() {
               <div className="min-w-0">
                 <div className="font-semibold truncate">{c.nome}</div>
                 <div className="text-xs text-muted-foreground">{c.telefone ?? "Sem telefone"}</div>
-                {c.por_quem_veio && <div className="text-xs text-muted-foreground mt-0.5">Veio por: {c.por_quem_veio}</div>}
+                {c.quem_indicou && <div className="text-xs text-muted-foreground mt-0.5">Indicado por: {c.quem_indicou}</div>}
               </div>
               <div className="flex gap-1">
                 {c.telefone && (
@@ -95,14 +95,13 @@ function ClienteFormDialog({ cliente, onClose }: { cliente: Cliente | null; onCl
   const [nome, setNome] = useState(cliente?.nome ?? "");
   const [telefone, setTelefone] = useState(cliente?.telefone ?? "");
   const [nasc, setNasc] = useState(cliente?.data_nascimento ?? "");
-  const [porQuem, setPorQuem] = useState(cliente?.por_quem_veio ?? "");
   const [quemIndicou, setQuemIndicou] = useState(cliente?.quem_indicou ?? "");
   const [obs, setObs] = useState(cliente?.observacoes ?? "");
   const [saving, setSaving] = useState(false);
 
   async function salvar() {
     const parsed = clienteSchema.safeParse({
-      nome, telefone, data_nascimento: nasc, por_quem_veio: porQuem,
+      nome, telefone, data_nascimento: nasc,
       quem_indicou: quemIndicou, observacoes: obs,
     });
     if (!parsed.success) { toast.error(formatZodError(parsed.error)); return; }
@@ -112,7 +111,7 @@ function ClienteFormDialog({ cliente, onClose }: { cliente: Cliente | null; onCl
       if (cliente) {
         const { error } = await supabase.from("clientes").update({
           nome: v.nome, telefone: v.telefone || null,
-          data_nascimento: v.data_nascimento || null, por_quem_veio: v.por_quem_veio || null,
+          data_nascimento: v.data_nascimento || null,
           quem_indicou: v.quem_indicou || null, observacoes: v.observacoes || null,
         }).eq("id", cliente.id);
         if (error) throw error;
@@ -121,7 +120,7 @@ function ClienteFormDialog({ cliente, onClose }: { cliente: Cliente | null; onCl
           _nome: v.nome,
           _telefone: (v.telefone || null) as any,
           _data_nascimento: (v.data_nascimento || null) as any,
-          _por_quem_veio: (v.por_quem_veio || null) as any,
+          _por_quem_veio: null as any,
           _quem_indicou: (v.quem_indicou || null) as any,
           _observacoes: (v.observacoes || null) as any,
         });
@@ -143,10 +142,9 @@ function ClienteFormDialog({ cliente, onClose }: { cliente: Cliente | null; onCl
         <DialogHeader><DialogTitle>{cliente ? "Editar cliente" : "Novo cliente"}</DialogTitle></DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2"><Label>Nome *</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-          <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="DDD + número" /></div>
+          <div><Label>Telefone / WhatsApp</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="DDD + número" /></div>
           <div><Label>Data de nascimento</Label><Input type="date" value={nasc ?? ""} onChange={(e) => setNasc(e.target.value)} /></div>
-          <div><Label>Por quem veio</Label><Input value={porQuem} onChange={(e) => setPorQuem(e.target.value)} /></div>
-          <div><Label>Quem indicou</Label><Input value={quemIndicou} onChange={(e) => setQuemIndicou(e.target.value)} /></div>
+          <div className="sm:col-span-2"><Label>Quem indicou</Label><Input value={quemIndicou} onChange={(e) => setQuemIndicou(e.target.value)} /></div>
           <div className="sm:col-span-2"><Label>Observações</Label><Textarea value={obs} onChange={(e) => setObs(e.target.value)} /></div>
         </div>
         <DialogFooter>
