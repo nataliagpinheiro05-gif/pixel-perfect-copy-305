@@ -187,7 +187,9 @@ function EstoquePage() {
   );
 }
 
-function ItemForm({ item, onClose }: { item: Item | null; onClose: () => void }) {
+const UNIDADES_INTEIRAS = new Set(["unidade","caixa","pacote","pote","sachê"]);
+
+function ItemForm({ item, onClose, onMovimentar }: { item: Item | null; onClose: () => void; onMovimentar: (item: Item) => void }) {
   const isNew = !item;
   const [f, setF] = useState({
     nome: item?.nome ?? "", categoria: item?.categoria ?? "Insumos Herbalife",
